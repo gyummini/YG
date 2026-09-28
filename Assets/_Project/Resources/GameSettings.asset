@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 874cdca6db62ba244a4b5b6dca79b21f, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: NightOffice::NightOffice.GameSettings
+  night:
+    realSecondsPerNight: 1200
+    targetComplaints: 5
+    complaintIntervalSec: 240
+    firstComplaintDelaySec: 40
+    knockCodeCount: 3
+    vanishToResultSec: 6
+    unlockedBundles: 01020304y
+    clearBundlesOnReturn: 1
+    vacantPerFloor: 2
+    storagePerFloor: 1
+  player:
+    walkSpeed: 2.3
+    lookSensitivity: 0.11
+    eyeHeight: 1.62
+    headDownPitch: 68
+    headDownRange: 14
+    movingThreshold: 0.3
+    nearWallDistance: 0.6
+    interactDistance: 2.1
+    footstepStride: 0.72
+    headDownToggle: 0
+    eyesClosedToggle: 0
+  voice:
+    proximityMinDistance: 1.2
+    proximityMaxDistance: 16
+    muffleRadius: 3.5
+    muffleCutoffHz: 380
+    muffleGain: 0.55
+    muffleMaxHearDistance: 9
+    declickMs: 6
+    radioTailSec: 0.3
+    radioLowHz: 380
+    radioHighHz: 2700
+    radioDrive: 3.2
+    radioGain: 0.9
+    radioCollisionWindowSec: 0.15
+    radioDeadRadius: 9
+    radioSfxPickupRadius: 9
+    radioSfxRelayVolume: 0.85
+    radioHissVolume: 0.08
+    selfNoiseMaskDb: -9
+    testVoiceVolume: 0.8
+  ducking:
+    depthDb: -14
+    threshold: 0.012
+    attackSec: 0.12
+    releaseSec: 2.6
+    holdSec: 0.35
+  doors:
+    swingSec: 0.35
+    officeAutoCloseSec: 4
+    fireAutoCloseSec: 3
+    unitAutoCloseSec: 0
+  elevator:
+    floorTravelSec: 3
+    doorAnimSec: 1
+    doorOpenHoldSec: 4
+  lights:
+    initialCorridorOnChance: 0.6
+    fixtureKw: 0.12
+    floorBaseKw: 0.8
+    powerNoiseKw: 0.015
+  net:
+    maxPlayers: 2
+    lanPort: 7777
+    lanAddress: 127.0.0.1
+  debug:
+    showOverlayOnStart: 0
+    allowTestVoice: 1

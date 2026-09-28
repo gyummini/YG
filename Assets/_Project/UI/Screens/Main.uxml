@@ -1,0 +1,60 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:no="NightOffice">
+    <ui:Style src="Main.uss" />
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+        <ui:VisualElement name="hudScreen" class="screen hud" picking-mode="Ignore">
+            <ui:VisualElement name="crosshair" class="crosshair" picking-mode="Ignore" />
+            <no:RingProgress name="holdRing" class="hold-ring" picking-mode="Ignore" />
+            <ui:Label name="prompt" class="prompt hidden" picking-mode="Ignore" />
+            <ui:Label name="radioIndicator" class="radio-indicator" picking-mode="Ignore" />
+            <ui:VisualElement name="lobbyInfo" class="lobby-info" picking-mode="Ignore">
+                <ui:Label name="lobbyCode" class="lobby-code" picking-mode="Ignore" />
+                <ui:Label name="lobbyRoles" picking-mode="Ignore" />
+                <ui:Label name="lobbyVoice" picking-mode="Ignore" />
+                <ui:Label name="lobbyHint" text="Esc: 메뉴 (역할 바꾸기 · 밤 시작 · 설정)" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="toast" class="toast hidden" picking-mode="Ignore" />
+            <ui:VisualElement name="eyesOverlay" class="black-overlay hidden" picking-mode="Ignore" />
+            <ui:VisualElement name="vanishOverlay" class="black-overlay hidden" picking-mode="Ignore">
+                <ui:Label name="vanishText" class="vanish-text" text="…" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="menuScreen" class="screen menu-screen">
+            <ui:Label class="title" text="야간 관리사무소" />
+            <ui:Label class="subtitle" text="2인 협동 공포 · 그레이박스 프로토타입" />
+            <ui:VisualElement class="menu-panel">
+                <ui:Label class="section-label" text="온라인 (Relay · 세션 참가 코드)" />
+                <ui:Button name="hostRelayButton" text="방 만들기" />
+                <ui:VisualElement class="row">
+                    <ui:TextField name="joinCodeField" class="grow" max-length="12" />
+                    <ui:Button name="joinRelayButton" text="코드로 참가" />
+                </ui:VisualElement>
+                <ui:Label class="section-label" text="LAN (Unity Cloud 연결 없이 테스트)" />
+                <ui:VisualElement class="row">
+                    <ui:Button name="hostLanButton" text="LAN 호스트" />
+                    <ui:TextField name="lanAddressField" class="grow" value="127.0.0.1" />
+                    <ui:Button name="joinLanButton" text="LAN 참가" />
+                </ui:VisualElement>
+                <ui:Label name="menuStatus" class="status" />
+                <ui:Button name="quitButton" text="종료" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="pauseScreen" class="screen pause-screen hidden">
+            <ui:VisualElement class="menu-panel">
+                <ui:Label class="panel-title" text="메뉴" />
+                <ui:Button name="resumeButton" text="계속" />
+                <ui:Button name="swapRolesButton" text="역할 바꾸기 (상황실 ↔ 현장)" />
+                <ui:Button name="startNightButton" text="밤 시작" />
+                <ui:Label class="section-label" text="설정" />
+                <ui:Slider name="sensSlider" label="마우스 감도" low-value="0.2" high-value="3" />
+                <ui:Slider name="masterSlider" label="전체 음량" low-value="0" high-value="1" />
+                <ui:Slider name="voiceSlider" label="목소리" low-value="0" high-value="1.5" />
+                <ui:Slider name="ambSlider" label="환경음" low-value="0" high-value="1.5" />
+                <ui:Toggle name="headDownToggle" label="고개 숙이기를 토글로" />
+                <ui:Label name="controlsHelp" class="help" />
+                <ui:Button name="leaveButton" text="나가기" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
