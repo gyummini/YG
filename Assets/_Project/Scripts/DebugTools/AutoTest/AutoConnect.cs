@@ -21,22 +21,46 @@ namespace NightOffice
             m_NextTry = Time.time + (InstanceInfo.IsMainEditor ? 0.5f : 3f);
         }
 
+        bool m_CodeWritten;
+
         void Update()
         {
             var cm = ConnectionManager.I;
-            if (cm == null || Time.time < m_NextTry) return;
+            var req = AutoTestRequest.Current;
+            if (cm == null || req == null || Time.time < m_NextTry) return;
             m_NextTry = Time.time + 2f;
+            bool relay = req.net == "relay";
             if (InstanceInfo.IsMainEditor)
             {
-                if (!m_Hosted && !cm.IsOnline)
+                if (!m_Hosted && !cm.IsOnline && !cm.Busy)
                 {
                     m_Hosted = true;
-                    cm.HostLan();
+                    if (relay)
+                    {
+                        try { System.IO.File.Delete(req.JoinCodePath); }
+                        catch (System.Exception) { }
+                        cm.HostRelay();
+                    }
+                    else cm.HostLan();
+                }
+                if (relay && !m_CodeWritten && cm.UsingRelay && !string.IsNullOrEmpty(cm.JoinCode))
+                {
+                    System.IO.File.WriteAllText(req.JoinCodePath, cm.JoinCode);
+                    m_CodeWritten = true;
+                    GameLog.Info("AutoTest", "join code written " + cm.JoinCode);
                 }
             }
-            else if (!cm.IsOnline)
+            else if (!cm.IsOnline && !cm.Busy)
             {
-                cm.JoinLan("127.0.0.1");
+                if (!relay)
+                {
+                    cm.JoinLan("127.0.0.1");
+                }
+                else if (System.IO.File.Exists(req.JoinCodePath) &&
+                         System.DateTime.Now - System.IO.File.GetLastWriteTime(req.JoinCodePath) < System.TimeSpan.FromMinutes(5))
+                {
+                    cm.JoinRelay(System.IO.File.ReadAllText(req.JoinCodePath).Trim());
+                }
             }
         }
     }

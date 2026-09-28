@@ -15,6 +15,12 @@ namespace NightOffice
         public long createdUnix;
         public string reportDir = "";
         public bool quitWhenDone = true;
+        /// <summary>"lan" (default) or "relay" (Unity Multiplayer Services session + join code).</summary>
+        public string net = "lan";
+        /// <summary>Force Vivox capture silence on both instances (they share one microphone).</summary>
+        public bool muteMic = true;
+
+        public string JoinCodePath => Path.Combine(string.IsNullOrEmpty(reportDir) ? Application.persistentDataPath : reportDir, "joincode.txt");
 
         public static string RequestPath => Path.Combine(Application.persistentDataPath, "autotest_request.json");
 

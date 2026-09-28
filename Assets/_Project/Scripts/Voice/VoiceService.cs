@@ -33,7 +33,11 @@ namespace NightOffice
         bool m_Subscribed;
         string m_WantChannel;
 
-        public static bool ForceCaptureSilence => InstanceInfo.HasTag("NoMic") || Environment.GetCommandLineArgs().Contains("-nomic");
+        public static bool ForceCaptureSilence =>
+            InstanceInfo.HasTag("NoMic") || Environment.GetCommandLineArgs().Contains("-nomic") ||
+            (AutoTestRequest.Current != null && AutoTestRequest.Current.muteMic);
+
+        public static string TestVoiceWavPath => System.IO.Path.Combine(Application.dataPath, "_Project/Audio/Generated/test_voice.wav");
 
         public string StatusText
         {

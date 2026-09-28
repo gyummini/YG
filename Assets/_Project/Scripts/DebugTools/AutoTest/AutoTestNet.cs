@@ -27,6 +27,10 @@ namespace NightOffice
         public string role;
         public string voiceState;
         public bool officeDoorAcousticOpen;
+        public bool usingRelay;
+        public string joinCode;
+        public bool otherHasTap;
+        public int vivoxParticipants;
 
         public static Observation Capture()
         {
@@ -64,6 +68,11 @@ namespace NightOffice
             o.voiceState = VoiceService.I != null ? VoiceService.I.State.ToString() : "";
             var door = VoiceRouter.OfficeDoor;
             o.officeDoorAcousticOpen = door != null && door.AcousticOpen;
+            var cm = ConnectionManager.I;
+            o.usingRelay = cm != null && cm.UsingRelay;
+            o.joinCode = cm != null ? cm.JoinCode : "";
+            o.otherHasTap = local != null && local.Other != null && local.Other.remoteVoice != null && local.Other.remoteVoice.HasTap;
+            o.vivoxParticipants = VoiceService.I != null ? VoiceService.I.RemoteParticipants : 0;
             return o;
         }
     }
@@ -111,6 +120,14 @@ namespace NightOffice
         }
 
         public bool TryGetReport(int id, out Observation o) => m_Reports.TryGetValue(id, out o);
+
+        /// <summary>Client side: stream the synthetic test voice into its own Vivox transmission.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientInjectRpc(bool on)
+        {
+            if (on) VoiceService.I?.StartInjection(VoiceService.TestVoiceWavPath);
+            else VoiceService.I?.StopInjection();
+        }
 
         /// <summary>Client side: set a state flag that is not driven by held input (e.g. flashlight on).</summary>
         [Rpc(SendTo.NotServer)]

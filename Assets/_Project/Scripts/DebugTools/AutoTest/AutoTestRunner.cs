@@ -59,6 +59,7 @@ namespace NightOffice
                     case "stage1": suite = Stage1(); break;
                     case "stage2": suite = Stage2(); break;
                     case "stage3": suite = Stage3(); break;
+                    case "online": suite = Online(); break;
                 }
                 if (suite != null) yield return StartCoroutine(Guard(suite));
                 else Note("unknown suite " + m_Request.suite);
