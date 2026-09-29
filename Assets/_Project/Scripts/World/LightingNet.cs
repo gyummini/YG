@@ -230,6 +230,29 @@ namespace NightOffice
             SwitchMask.Value = (byte)m;
         }
 
+        /// <summary>Server: (floor) after a field player reset that floor's electric panel.</summary>
+        public event Action<int> ServerPanelReset;
+
+        /// <summary>배전함 리셋 (hold E at the panel): clears 누전 and revives the floor's eaten lights.</summary>
+        [Rpc(SendTo.Server)]
+        public void RequestPanelResetRpc(int floor, RpcParams rpcParams = default)
+        {
+            var p = PlayerNet.ByClient(rpcParams.Receive.SenderClientId);
+            if (p == null || floor < 2 || floor > BuildingLayout.MaxFloor) return;
+            var panel = BuildingLayout.PanelPosition(floor);
+            if (Vector3.Distance(p.transform.position + Vector3.up * 1.2f, panel) > 3.0f) return;
+            ServerResetFloor(floor);
+            PanelResetSoundRpc(panel);
+            ServerPanelReset?.Invoke(floor);
+            GameLog.Info("Panel", $"{floor}층 배전함 리셋");
+        }
+
+        [Rpc(SendTo.Everyone)]
+        void PanelResetSoundRpc(Vector3 at)
+        {
+            AudioService.I?.PlayAt(SfxId.PanelReset, at, 1f);
+        }
+
         /// <summary>Control room remote switch (원격 조작 → 층별 조명, one corridor section).</summary>
         [Rpc(SendTo.Server)]
         public void RemoteSetSectionRpc(int floor, int section, bool on, RpcParams rpcParams = default)

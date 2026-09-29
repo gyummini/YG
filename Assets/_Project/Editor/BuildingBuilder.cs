@@ -85,6 +85,8 @@ namespace NightOffice.EditorTools
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             BuildNavMesh(elevator);
+            ReportWalkTimes();       // measured with every doorway open
+            AddDoorObstacles();      // then closed doors block entity paths at runtime
             FixNetworkObjectIds();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -94,7 +96,24 @@ namespace NightOffice.EditorTools
             EditorBuildSettings.scenes = scenes.ToArray();
             Debug.Log($"[NightOffice] scene built: zones={s_ZoneList.Count} portals={s_Portals.Count} fixtures={s_FixtureId} doors={Object.FindObjectsByType<Door>(FindObjectsInactive.Include).Length}");
             if (s_FixtureId > FixtureMask.Capacity) Debug.LogError($"[NightOffice] {s_FixtureId} fixtures exceed the {FixtureMask.Capacity}-bit dead mask");
-            ReportWalkTimes();
+        }
+
+        /// <summary>
+        /// Carving obstacle on every door leaf: entities path around closed doors, open doorways stay walkable
+        /// (the baked navmesh ignores the Door layer).
+        /// </summary>
+        static void AddDoorObstacles()
+        {
+            foreach (var door in Object.FindObjectsByType<Door>(FindObjectsInactive.Include))
+            {
+                var leaf = door.hinge != null && door.hinge.childCount > 0 ? door.hinge.GetChild(0) : null;
+                if (leaf == null) continue;
+                var obstacle = leaf.gameObject.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+                obstacle.shape = UnityEngine.AI.NavMeshObstacleShape.Box;
+                obstacle.size = Vector3.one;
+                obstacle.carving = true;
+                obstacle.carveOnlyStationary = true;
+            }
         }
 
         /// <summary>Extension point for later stages (entities, terminal...).</summary>

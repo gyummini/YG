@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbde2f2a052e20a45ba5c638b4cab4c6, type: 3}
+  m_Name: LightEater
+  m_EditorClassIdentifier: NightOffice::NightOffice.EntityDefinition
+  id: 5
+  displayName: "\uBD88\uBA39\uB294 \uAC83"
+  bundle: 3
+  category: 1
+  pictogram: e_lighteater
+  nature: "\uBE5B\uC744 \uBA39\uC73C\uBA70 \uB2E4\uAC00\uC628\uB2E4."
+  clues:
+  - attr: 0
+    value: "\uC870\uBA85\uC774 \uAEBC\uC9C4\uB2E4"
+    expensive: 0
+    how: 
+  - attr: 8
+    value: "\uD604\uC7A5 \uCABD\uC73C\uB85C \uCC28\uB840\uB85C \uB5A8\uC5B4\uC9D0"
+    expensive: 0
+    how: 
+  - attr: 6
+    value: "\uCEE4\uC9D0"
+    expensive: 1
+    how: "\uD655\uC778\uD558\uB824\uBA74 \uBB34\uC804\uC744 \uC624\uB798 \uB20C\uB7EC\uC57C \uD55C\uB2E4."
+  condition: "\uD604\uC7A5\uC774 \uBCF5\uB3C4\uC5D0 \uC788\uB294\uC9C0 \uACC4\uB2E8\uC5D0 \uC788\uB294\uC9C0"
+  common:
+    when: 
+    text: 
+    pictograms: []
+  branches:
+  - when: "\uBCF5\uB3C4"
+    text: "\uC0C1\uD669\uC2E4\uC774 \uADF8 \uCE35 \uC870\uBA85\uC744 \uC804\uBD80 \uBA3C\uC800 \uB044\uACE0, \uD604\uC7A5\uC740 \uC190\uC804\uB4F1\uC744 \uB044\uACE0 10\uCD08 \uC81C\uC790\uB9AC."
+    pictograms:
+    - a_lights_off
+    - a_flashlight_off
+    - a_wait
+  - when: "\uACC4\uB2E8"
+    text: "\uD604\uC7A5\uC740 \uD55C \uCE35 \uC62C\uB77C\uAC00\uACE0, \uC0C1\uD669\uC2E4\uC740 \uC544\uB798\uCE35 \uC870\uBA85\uC744 \uCF1C \uBBF8\uB07C\uB85C \uB454\uB2E4."
+    pictograms:
+    - a_upstairs
+    - a_lure_below
+  hasWarning: 1
+  warning: "\uD604\uC7A5 \uC190\uC804\uB4F1\uC774 \uAEBC\uC838 \uB2E4\uC2DC \uCF1C\uC9C0\uC9C0 \uC54A\uB294\uB2E4."
+  variants: []

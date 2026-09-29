@@ -127,6 +127,47 @@ namespace NightOffice
         }
 
         [Serializable]
+        public class EntitySettings
+        {
+            [Header("등록 · 등장")]
+            [Tooltip("묶음이 등록된 뒤 현장이 위층에 들어서면 이 범위(초) 뒤에 나타남")] public Vector2 manifestDelaySec = new Vector2(4f, 10f);
+            [Tooltip("판정 샘플 간격(초)")] public float tickSec = 0.1f;
+
+            [Header("키 큰 형체 (키다리 · 배웅꾼)")]
+            [Tooltip("현장에게서 이만큼 떨어진 복도에 나타남(m)")] public float spawnDistance = 22f;
+            public float tallOneSpeed = 0.55f;
+            public float escortSpeed = 0.95f;
+            [Tooltip("경고 뒤 걸음 배율")] public float warnedSpeedMultiplier = 2.6f;
+            [Tooltip("이 거리 안에서 대응 규칙을 판정(m)")] public float ruleRange = 12f;
+            [Tooltip("현장 바로 앞에 멈추는 거리(m)")] public float engageDistance = 2.2f;
+            [Tooltip("눈을 마주친 것으로 보는 시선 각도(도)")] public float gazeAngle = 15f;
+            [Tooltip("시선을 이만큼(초) 떼면 실수")] public float gazeBreakTolerance = 1.0f;
+            [Tooltip("범위에 들어온 뒤 대응을 시작할 여유(초)")] public float ruleGrace = 2.0f;
+            [Tooltip("바로 앞에서 눈을 마주치고 버티면 물러나는 시간(초)")] public float gazeHoldToRetreat = 4f;
+            [Tooltip("이 거리 안인데 손전등이 손에 켜져 있으면 실수(m)")] public float flashDropDistance = 2.5f;
+            [Tooltip("이 속도로 움직이는 시간(초)이 이만큼이면 '움직임' 실수")] public float moveTolerance = 0.5f;
+            [Tooltip("불이 켜진 뒤 고개를 들어 눈을 마주칠 여유(초)")] public float lightsOnGrace = 2.5f;
+            [Tooltip("어두운 채로 바로 앞에서 기다려 주는 한계(초)")] public float darkPatience = 45f;
+            [Tooltip("배웅꾼: 이 거리에서 현장 위치(벽 쪽/한가운데·계단)를 확정(m)")] public float escortLockDistance = 6f;
+            [Tooltip("배웅꾼: 벽 쪽 대응을 판정하는 거리(m)")] public float escortPassRange = 4f;
+            [Tooltip("배웅꾼: 한가운데 대응에서 고개를 들어도 되는 여유(초)")] public float escortHeadUpGrace = 1.0f;
+            [Tooltip("배웅꾼이 현장에 닿았다고 보는 거리(m)")] public float escortContactDistance = 1.4f;
+            [Tooltip("문을 닫고 방에 숨은 현장을 지나쳐 이만큼 가면 해결(m)")] public float escortPassedDistance = 6f;
+            [Tooltip("손가락이 보이는 거리(손전등을 손에 비출 때, m)")] public float fingerVisibleDistance = 4f;
+
+            [Header("불먹는 것")]
+            [Tooltip("등기구 하나를 먹는 간격(초)")] public float eatIntervalSec = 2.4f;
+            [Tooltip("이 거리 안에서 복도/계단 조건 확정(m)")] public float eaterLockDistance = 12f;
+            [Tooltip("먹을 빛이 없으면 이 시간(초) 뒤 떠남 — 복도 대응의 '10초 제자리'")] public float eaterStarveSec = 10f;
+            [Tooltip("현장에게 닿았다고 보는 거리(m)")] public float eaterContactDistance = 3f;
+            [Tooltip("무전 잡음이 들리기 시작하는 거리(m)")] public float eaterNoiseRange = 30f;
+            [Tooltip("미끼 층 조명을 먹는 개수")] public int eaterLureMeals = 4;
+
+            [Header("배전함")]
+            [Tooltip("배전함 리셋에 E를 누르고 있는 시간(초)")] public float panelHoldSec = 2.5f;
+        }
+
+        [Serializable]
         public class NetSettings
         {
             public int maxPlayers = 2;
@@ -148,6 +189,7 @@ namespace NightOffice
         public DoorSettings doors = new DoorSettings();
         public ElevatorSettings elevator = new ElevatorSettings();
         public LightSettings lights = new LightSettings();
+        public EntitySettings entities = new EntitySettings();
         public NetSettings net = new NetSettings();
         public DebugSettings debug = new DebugSettings();
     }

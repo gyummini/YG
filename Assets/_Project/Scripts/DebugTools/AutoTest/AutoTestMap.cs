@@ -120,6 +120,7 @@ namespace NightOffice
                 var z = field.Zone;
                 Check($"{s.Label}: 4F → 1F 계단참까지 걸어서 내려감", ok && field.Floor == 1 && z != null && z.key == s.Key, $"{secs:0.0}s floor={field.Floor} zone={(z != null ? z.key : "-")}");
                 Door.ByKey(door1).ServerOpen(0f);
+                yield return new WaitForSeconds(1.2f); // leaf swings aside, its navmesh carve moves with it
                 yield return WalkField(s.Door(1) + s.OutDir * 3.0f, 20f, (a, b) => { ok = a; secs = b; });
                 z = field.Zone;
                 Check($"{s.Label}: 1F 방화문을 지나 로비(1층 복도)로", ok && z != null && z.key == "lobby", $"zone={(z != null ? z.key : "-")}");
@@ -127,6 +128,17 @@ namespace NightOffice
             }
 
             // ---------------------------------------------------------------- 4) 관리사무소 → 가장 먼 세대 (실제 보행)
+            // closed doors carve the navmesh (entities path around them): open every stair door to measure the building
+            var stairDoors = new System.Collections.Generic.List<Door>();
+            for (int fl = 1; fl <= L.MaxFloor; fl++)
+                foreach (var key in new[] { "fireW" + fl, "fireE" + fl })
+                {
+                    var d = Door.ByKey(key);
+                    if (d == null) continue;
+                    d.ServerOpen(0f);
+                    stairDoors.Add(d);
+                }
+            yield return new WaitForSeconds(1.5f);
             var start = L.OfficeDoor + Vector3.right * 1.0f;
             int farUnit = 0;
             float farLen = 0f;
@@ -139,8 +151,7 @@ namespace NightOffice
             float speed = GameSettings.I.player.walkSpeed;
             Note($"navmesh: farthest unit on foot {farUnit} = {farLen:0.0} m ({farLen / speed:0.0} s at {speed} m/s)");
             Check("가장 먼 세대까지 걸어서 약 1분(경로 길이)", farLen / speed > 45f && farLen / speed < 75f, $"{farUnit} {farLen:0.0} m / {farLen / speed:0.0} s");
-            foreach (var key in new[] { "fireW1", "fireE1", "fireW4", "fireE4", "fireMid4" })
-                Door.ByKey(key)?.ServerOpen(0f);
+            Door.ByKey("fireMid4")?.ServerOpen(0f);
             field.TeleportRpc(start, 90f);
             yield return new WaitForSeconds(1.2f);
             L.TryGetUnit(farUnit, out var target);
@@ -149,8 +160,7 @@ namespace NightOffice
             yield return WalkField(target.OutsideDoor, 120f, (a, b) => { walked = a; walkSec = b; });
             Check("실제로 걸어서 도착(방화문 미리 열어 둠)", walked, $"{walkSec:0.0}s");
             Check("실제 보행 시간 약 1분", walked && walkSec > 45f && walkSec < 80f, $"{walkSec:0.0}s to {farUnit}");
-            foreach (var key in new[] { "fireW1", "fireE1", "fireW4", "fireE4" })
-                Door.ByKey(key)?.ServerClose();
+            foreach (var d in stairDoors) d.ServerClose();
 
             // ---------------------------------------------------------------- 5) views for the report
             yield return MapViews();
@@ -217,7 +227,7 @@ namespace NightOffice
         /// Walks the field player (MPPM clone) along a navmesh path by steering its look and holding "forward",
         /// exactly like a player would; doors on the way must already be open.
         /// </summary>
-        IEnumerator WalkField(Vector3 target, float timeout, System.Action<bool, float> done)
+        IEnumerator WalkField(Vector3 target, float timeout, System.Action<bool, float> done, bool headDown = false)
         {
             var field = FieldP;
             var path = new NavMeshPath();
@@ -260,10 +270,10 @@ namespace NightOffice
                     break;
                 }
                 AutoTestNet.I.ClientLookRpc(Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg, 0f);
-                FieldInput(move: new Vector2(0f, 1f));
+                FieldInput(move: new Vector2(0f, 1f), headDown: headDown);
                 yield return new WaitForSeconds(0.06f);
             }
-            FieldInput();
+            FieldInput(headDown: headDown);
             yield return new WaitForSeconds(0.4f);
             done(i >= corners.Length, Time.time - t0);
         }

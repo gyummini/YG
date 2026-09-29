@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="Fax.uss" />
+    <ui:VisualElement name="faxScreen" class="screen fax-screen hidden">
+        <ui:VisualElement class="fax-paper">
+            <ui:Label class="fax-head" text="야간 관리사무소 · 교대 지침" />
+            <ui:Label name="faxMeta" class="fax-meta" />
+            <ui:Label class="fax-section" text="기본 규칙" />
+            <ui:VisualElement name="faxRules" />
+            <ui:Label class="fax-section" text="호출 부호" />
+            <ui:Label name="faxCallSigns" class="fax-rule" />
+            <ui:Label class="fax-section" text="오늘 밤 노크 암호 (한 번 쓰면 폐기)" />
+            <ui:VisualElement name="faxCodes" />
+            <ui:Button name="faxClose" class="fax-close" text="닫기 (Esc)" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

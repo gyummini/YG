@@ -471,9 +471,22 @@ namespace NightOffice
         /// <summary>Distance along the corridor centerline from the west stair door (0 .. <see cref="CorridorLength"/>).</summary>
         public static float PathPos(Vector3 p)
         {
-            if (OnBentWing(p)) return StraightLength + (CorridorCenterZ - Mathf.Clamp(p.z, EastStairDoorZ, CorridorCenterZ));
+            // the corner square belongs to the bent run once past the centerline's turn
+            if (OnBentWing(p) || (p.x >= InnerCornerX - 0.01f && p.z < CorridorCenterZ))
+                return StraightLength + (CorridorCenterZ - Mathf.Clamp(p.z, EastStairDoorZ, CorridorCenterZ));
             return Mathf.Clamp(p.x - WestStairDoorX, 0f, StraightLength);
         }
+
+        /// <summary>Point on the corridor centerline at path distance s (inverse of <see cref="PathPos"/>).</summary>
+        public static Vector3 PathPoint(float s, int floor)
+        {
+            s = Mathf.Clamp(s, 0f, CorridorLength);
+            if (s <= StraightLength) return new Vector3(WestStairDoorX + s, FloorY(floor), CorridorCenterZ);
+            return new Vector3(BentCenterX, FloorY(floor), CorridorCenterZ - (s - StraightLength));
+        }
+
+        /// <summary>Path distance of the mid-corridor fire door.</summary>
+        public const float MidFireDoorPathPos = MidFireDoorX - WestStairDoorX;
 
         /// <summary>Corridor section (lighting circuit / voice threshold side) a point on 2F~4F belongs to.</summary>
         public static int SectionAt(Vector3 p) => OnBentWing(p) || p.x >= MidFireDoorX ? SectionEast : SectionWest;

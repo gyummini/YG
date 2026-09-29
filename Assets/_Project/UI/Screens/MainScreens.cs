@@ -172,7 +172,8 @@ namespace NightOffice
             }
 
             // pause
-            if (inGame && local.inputs != null && local.inputs.PausePressed && !UIState.Has("terminal") && !UIState.Has("fax"))
+            if (inGame && local.inputs != null && local.inputs.PausePressed && !UIState.Has("terminal") && !UIState.Has("fax")
+                && Time.frameCount - OfficeScreensController.LastClosedFrame > 1)
                 SetPause(!UIState.Has(PauseKey));
             if (!inGame && UIState.Has(PauseKey)) SetPause(false);
             bool lobby = !NightDirector.IsRunning;

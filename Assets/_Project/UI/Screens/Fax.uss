@@ -1,0 +1,59 @@
+.fax-screen {
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.fax-paper {
+    width: 780px;
+    background-color: rgb(236, 232, 218);
+    padding: 26px 36px;
+    border-radius: 2px;
+}
+
+.fax-paper .unity-label {
+    color: rgb(38, 36, 32);
+}
+
+.fax-head {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+}
+
+.fax-meta {
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.fax-section {
+    margin-top: var(--space-md);
+    -unity-font-style: bold;
+    border-bottom-width: 1px;
+    border-color: rgb(120, 114, 100);
+}
+
+.fax-rule {
+    white-space: normal;
+    margin: 3px 0;
+}
+
+.fax-code-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 2px 0;
+}
+
+.fax-code {
+    font-size: 36px;
+    -unity-font-style: bold;
+    width: 170px;
+}
+
+.fax-dots {
+    font-size: var(--font-lg);
+}
+
+.fax-close {
+    margin-top: var(--space-md);
+    align-self: flex-end;
+}

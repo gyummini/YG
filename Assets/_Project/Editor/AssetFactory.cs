@@ -28,8 +28,51 @@ namespace NightOffice.EditorTools
             SoundLibrary();
             Materials();
             PanelSettingsAsset();
+            ConfigurePictogramImport();
+            ConfigureModelImport();
+            EntityContent.Build();
             AssetDatabase.SaveAssets();
             Debug.Log("[NightOffice] assets refreshed");
+        }
+
+        // ------------------------------------------------------------------ stage 2 imports
+        /// <summary>Manual pictograms (white glyph + alpha, tinted by USS): no mipmaps, clamp, uncompressed.</summary>
+        static void ConfigurePictogramImport()
+        {
+            var dir = Root + "/UI/Pictograms";
+            if (!AssetDatabase.IsValidFolder(dir)) return;
+            foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { dir }))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!(AssetImporter.GetAtPath(path) is TextureImporter imp)) continue;
+                imp.textureType = TextureImporterType.Default;
+                imp.alphaIsTransparency = true;
+                imp.mipmapEnabled = false;
+                imp.wrapMode = TextureWrapMode.Clamp;
+                imp.npotScale = TextureImporterNPOTScale.None;
+                imp.textureCompression = TextureImporterCompression.Uncompressed;
+                imp.maxTextureSize = 256;
+                imp.SaveAndReimport();
+            }
+        }
+
+        /// <summary>Blender models: geometry only (materials come from the project, no animation).</summary>
+        static void ConfigureModelImport()
+        {
+            var dir = Root + "/Models";
+            if (!AssetDatabase.IsValidFolder(dir)) return;
+            foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { dir }))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!(AssetImporter.GetAtPath(path) is ModelImporter imp)) continue;
+                imp.materialImportMode = ModelImporterMaterialImportMode.None;
+                imp.animationType = ModelImporterAnimationType.None;
+                imp.importAnimation = false;
+                imp.importCameras = false;
+                imp.importLights = false;
+                imp.globalScale = 1f;
+                imp.SaveAndReimport();
+            }
         }
 
         public static void Ensure(string path)

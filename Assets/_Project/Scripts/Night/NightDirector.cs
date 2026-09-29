@@ -65,6 +65,8 @@ namespace NightOffice
             CardLog.I?.ServerClear();
             RadioNet.I?.ServerForceRelease();
             KnockLog.Clear();
+            EntityDirector.I?.ServerReset();
+            ShiftFax.I?.ServerPrint(rng);
 
             int i = 0;
             foreach (var p in PlayerNet.All)

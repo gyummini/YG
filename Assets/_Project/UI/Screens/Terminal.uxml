@@ -1,0 +1,129 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:no="NightOffice">
+    <ui:Style src="Terminal.uss" />
+    <ui:Style src="Pictograms.uss" />
+    <ui:VisualElement name="terminalScreen" class="screen terminal-screen hidden">
+        <ui:VisualElement class="terminal-frame">
+            <ui:VisualElement class="terminal-header">
+                <ui:Label name="termClock" class="term-clock" text="00:00" />
+                <ui:VisualElement class="term-tabs">
+                    <ui:Button name="tabManual" class="term-tab" text="매뉴얼" />
+                    <ui:Button name="tabGauges" class="term-tab" text="계기판" />
+                    <ui:Button name="tabRemote" class="term-tab" text="원격 조작" />
+                    <ui:Button name="tabPlan" class="term-tab" text="도면" />
+                </ui:VisualElement>
+                <ui:Label name="termStatus" class="term-status" />
+                <ui:Button name="termClose" text="닫기 (Esc)" />
+            </ui:VisualElement>
+            <ui:VisualElement name="termRegistered" class="term-registered">
+                <ui:Label class="registered-caption" text="등록된 발생 상황" />
+            </ui:VisualElement>
+            <ui:VisualElement class="term-body">
+                <ui:VisualElement name="pageManual" class="term-page">
+                    <ui:ScrollView name="tagPanel" class="panel-box tag-panel">
+                        <ui:VisualElement class="row">
+                            <ui:Label class="panel-caption grow" text="판별 태그" />
+                            <ui:Button name="tagReset" text="태그 지우기" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="tagGroups" />
+                    </ui:ScrollView>
+                    <ui:ScrollView name="candidatePanel" class="panel-box candidate-panel">
+                        <ui:Label name="candidateCaption" class="panel-caption" text="후보" />
+                        <ui:VisualElement name="candidateList" />
+                    </ui:ScrollView>
+                    <ui:ScrollView name="entityCard" class="panel-box entity-card">
+                        <ui:Label name="cardEmpty" class="card-empty" text="태그로 후보를 하나까지 좁히면 대응이 나옵니다." />
+                        <ui:VisualElement name="cardBody" class="hidden">
+                            <ui:VisualElement class="card-head">
+                                <ui:VisualElement name="cardPicto" class="picto card-picto" />
+                                <ui:VisualElement class="card-titles">
+                                    <ui:Label name="cardName" class="card-name" />
+                                    <ui:Label name="cardCategory" class="card-category" />
+                                    <ui:Label name="cardNature" class="card-nature" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="cardCommon" class="card-common">
+                                <ui:VisualElement name="commonPicto" class="picto common-picto" />
+                                <ui:Label name="commonText" class="common-text" />
+                            </ui:VisualElement>
+                            <ui:Label name="cardCondition" class="card-condition" />
+                            <no:ForkLines name="cardFork" class="fork-lines" />
+                            <ui:VisualElement name="cardBranches" class="card-branches" />
+                            <ui:Label name="cardWarning" class="card-warning" />
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="pageGauges" class="term-page hidden">
+                    <ui:VisualElement class="gauge-col">
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="엘리베이터" />
+                            <ui:VisualElement class="elev-row">
+                                <ui:Label name="elevFloor" class="elev-floor" text="1" />
+                                <ui:Label name="elevDir" class="elev-dir" />
+                                <ui:VisualElement>
+                                    <ui:Label name="elevCount" class="elev-count" />
+                                    <ui:Label name="elevDoors" class="dim-note" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="층별 전력 (최근 40초)" />
+                            <ui:VisualElement name="powerRows" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="gauge-col">
+                        <ui:VisualElement class="panel-box cardlog-box">
+                            <ui:Label class="panel-caption" text="출입 카드 기록" />
+                            <ui:ScrollView name="cardLogList" class="cardlog-list" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="세대 명부 (오늘 밤)" />
+                            <ui:VisualElement name="registryRows" />
+                            <ui:VisualElement class="legend-row">
+                                <ui:Label class="unit-chip vacant" text="공실" />
+                                <ui:Label class="unit-chip storage" text="창고" />
+                                <ui:Label class="unit-chip" text="거주" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="pageRemote" class="term-page hidden">
+                    <ui:VisualElement class="remote-col">
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="층별 조명 (복도 방화문 기준 서쪽 / 동쪽 구간)" />
+                            <ui:VisualElement name="lightRows" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="엘리베이터" />
+                            <ui:VisualElement name="elevCalls" class="remote-row" />
+                            <ui:VisualElement class="remote-row">
+                                <ui:Button name="elevStop" class="switch-btn" text="정지" />
+                                <ui:Button name="elevClose" class="switch-btn" text="문 닫기" />
+                            </ui:VisualElement>
+                            <ui:Label name="elevRemoteState" class="elev-state" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="remote-col">
+                        <ui:VisualElement class="panel-box">
+                            <ui:Label class="panel-caption" text="방화문 잠금 (잠그면 닫히고 카드로 안 열림)" />
+                            <ui:VisualElement name="doorRows" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="pagePlan" class="term-page hidden">
+                    <ui:VisualElement name="planFloors" class="plan-floors" />
+                    <no:FloorPlanView name="floorPlan" class="floor-plan" />
+                    <ui:VisualElement class="panel-box plan-legend">
+                        <ui:Label class="panel-caption" text="도면" />
+                        <ui:Label name="planNotes" class="dim-note" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="powerOut" class="power-out-overlay hidden">
+                <ui:Label class="power-out-text" text="· · · 전원 없음 · · ·" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

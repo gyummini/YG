@@ -190,5 +190,34 @@ namespace NightOffice
         /// <summary>Client side: set the office/fire door state etc. is server-only; exposed for completeness.</summary>
         [Rpc(SendTo.NotServer)]
         public void ClientLogRpc(string message) => GameLog.Info("AutoTest", message);
+
+        /// <summary>Client side: use a door like pressing E (card swipe, or the inside handle / pushing a held-open fire door).</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientDoorRpc(string key, bool swipe)
+        {
+            var d = Door.ByKey(key);
+            if (d == null) return;
+            if (swipe) d.RequestSwipeRpc();
+            else d.RequestToggleRpc();
+        }
+
+        /// <summary>Client side: finish holding E at an electric panel.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientPanelResetRpc(int floor) => LightingNet.I?.RequestPanelResetRpc(floor);
+
+        /// <summary>Client side: put the flashlight down in front of the feet (or pick it back up), like pressing G.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientDropFlashlightRpc(bool onFloor)
+        {
+            var local = PlayerNet.Local;
+            if (local == null) return;
+            if (onFloor)
+            {
+                var t = local.transform;
+                local.FlashFloorPos.Value = t.position + t.forward * 0.45f + Vector3.up * 0.06f;
+                local.FlashFloorYaw.Value = t.eulerAngles.y;
+            }
+            local.SetFlag(PlayerNet.Flags.FlashOnFloor, onFloor);
+        }
     }
 }

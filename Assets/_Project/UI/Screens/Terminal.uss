@@ -1,0 +1,551 @@
+.terminal-screen {
+    background-color: rgba(0, 0, 0, 0.72);
+    align-items: center;
+    justify-content: center;
+}
+
+.terminal-frame {
+    width: 95%;
+    height: 92%;
+    background-color: rgb(9, 12, 11);
+    border-width: 2px;
+    border-color: rgb(46, 58, 52);
+    border-radius: 6px;
+    padding: var(--space-md);
+}
+
+.terminal-header {
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: var(--space-sm);
+    border-bottom-width: 1px;
+    border-color: var(--color-panel-line);
+}
+
+.term-clock {
+    font-size: var(--font-xl);
+    color: var(--color-accent);
+    -unity-font-style: bold;
+    margin-right: var(--space-lg);
+}
+
+.term-tabs {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.term-tab {
+    margin: 0 var(--space-xs) 0 0;
+    padding: 6px 20px;
+}
+
+.term-tab.selected {
+    background-color: var(--color-accent-dim);
+    border-color: var(--color-accent);
+    color: rgb(250, 240, 220);
+}
+
+.term-status {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    margin-right: var(--space-md);
+}
+
+.term-status.alert {
+    color: var(--color-danger);
+}
+
+.term-registered {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 6px 0;
+    min-height: 34px;
+    border-bottom-width: 1px;
+    border-color: var(--color-panel-line);
+}
+
+.registered-caption {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    margin-right: var(--space-sm);
+}
+
+.registered-item {
+    color: var(--color-accent);
+    margin-right: var(--space-lg);
+}
+
+.registered-item.old {
+    color: var(--color-text-dim);
+}
+
+.term-body {
+    flex-grow: 1;
+    margin-top: var(--space-sm);
+}
+
+.term-page {
+    flex-grow: 1;
+    flex-direction: row;
+}
+
+.panel-box {
+    background-color: rgba(20, 24, 26, 0.92);
+    border-width: 1px;
+    border-color: var(--color-panel-line);
+    padding: var(--space-sm) var(--space-md);
+    margin: 0 var(--space-sm) var(--space-sm) 0;
+}
+
+.panel-caption {
+    color: var(--color-accent);
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.dim-note {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    white-space: normal;
+}
+
+/* ---------------------------------------------------------------- 매뉴얼 */
+.tag-panel {
+    width: 420px;
+}
+
+.tag-section {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    margin-top: var(--space-sm);
+    border-bottom-width: 1px;
+    border-color: var(--color-panel-line);
+}
+
+.tag-group {
+    margin-top: var(--space-xs);
+}
+
+.tag-group-caption {
+    font-size: var(--font-sm);
+}
+
+.tag-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.tag-chip {
+    font-size: var(--font-sm);
+    padding: 3px 10px;
+    margin: 2px 4px 2px 0;
+    border-radius: 12px;
+}
+
+.tag-chip.selected {
+    background-color: var(--color-accent-dim);
+    border-color: var(--color-accent);
+    color: rgb(250, 240, 220);
+}
+
+.candidate-panel {
+    width: 380px;
+}
+
+.candidate {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px;
+    margin-bottom: 4px;
+    border-width: 1px;
+    border-color: var(--color-panel-line);
+}
+
+.candidate-picto {
+    width: 52px;
+    height: 52px;
+    margin-right: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.candidate-texts {
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.candidate-name {
+    color: var(--color-text);
+}
+
+.candidate-nature {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    white-space: normal;
+}
+
+.entity-card {
+    flex-grow: 1;
+}
+
+.card-empty {
+    color: var(--color-text-dim);
+    align-self: center;
+    margin-top: 120px;
+}
+
+.card-head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.card-picto {
+    width: 132px;
+    height: 132px;
+    margin-right: var(--space-md);
+    flex-shrink: 0;
+}
+
+.card-titles {
+    flex-shrink: 1;
+}
+
+.card-name {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+}
+
+.card-category {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+}
+
+.card-nature {
+    font-size: var(--font-lg);
+    color: var(--color-accent);
+    white-space: normal;
+}
+
+.card-condition {
+    align-self: center;
+    margin-top: var(--space-md);
+    font-size: var(--font-md);
+}
+
+.fork-lines {
+    height: 30px;
+}
+
+.card-branches {
+    flex-direction: row;
+}
+
+.branch {
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    padding: 0 var(--space-sm);
+}
+
+.branch-when {
+    color: var(--color-accent);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-xs);
+}
+
+.branch-pictos {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: var(--space-xs);
+}
+
+.branch-picto {
+    width: 78px;
+    height: 78px;
+    margin: 0 3px;
+}
+
+.branch-text {
+    white-space: normal;
+    -unity-text-align: upper-center;
+    font-size: var(--font-sm);
+}
+
+.card-common {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--space-md);
+    padding: 6px;
+    border-width: 1px;
+    border-color: var(--color-accent-dim);
+}
+
+.common-picto {
+    width: 60px;
+    height: 60px;
+    margin-right: var(--space-sm);
+    flex-shrink: 0;
+}
+
+.common-text {
+    white-space: normal;
+    flex-shrink: 1;
+}
+
+.card-warning {
+    margin-top: var(--space-md);
+    color: var(--color-danger);
+    white-space: normal;
+}
+
+/* ---------------------------------------------------------------- 계기판 */
+.gauge-col {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.elev-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.elev-floor {
+    font-size: 64px;
+    color: var(--color-accent);
+    -unity-font-style: bold;
+    width: 120px;
+    -unity-text-align: middle-center;
+}
+
+.elev-dir {
+    font-size: var(--font-xl);
+    width: 48px;
+    -unity-text-align: middle-center;
+}
+
+.elev-count {
+    font-size: var(--font-lg);
+}
+
+.power-row {
+    flex-direction: row;
+    align-items: center;
+    height: 56px;
+}
+
+.power-floor {
+    width: 44px;
+}
+
+.power-spark {
+    flex-grow: 1;
+    height: 46px;
+    background-color: rgb(12, 15, 14);
+    border-width: 1px;
+    border-color: rgb(34, 42, 38);
+}
+
+.power-kw {
+    width: 96px;
+    -unity-text-align: middle-right;
+    font-size: var(--font-md);
+}
+
+.cardlog-box {
+    flex-grow: 1;
+}
+
+.cardlog-list {
+    flex-grow: 1;
+}
+
+.cardlog-row {
+    flex-direction: row;
+}
+
+.cardlog-time {
+    width: 70px;
+    color: var(--color-text-dim);
+}
+
+.cardlog-label {
+    flex-grow: 1;
+}
+
+.cardlog-ok {
+    width: 56px;
+    color: var(--color-ok);
+}
+
+.cardlog-row.denied > .cardlog-ok {
+    color: var(--color-danger);
+}
+
+.registry-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.registry-floor {
+    width: 44px;
+}
+
+.unit-chip {
+    width: 62px;
+    margin-right: 3px;
+    padding: 2px 0;
+    -unity-text-align: middle-center;
+    font-size: var(--font-sm);
+    border-width: 1px;
+    border-color: rgb(50, 54, 58);
+    color: var(--color-text-dim);
+}
+
+.unit-chip.vacant {
+    border-color: var(--color-ok);
+    color: var(--color-ok);
+}
+
+.unit-chip.storage {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.legend-row {
+    flex-direction: row;
+    margin-top: var(--space-xs);
+}
+
+.legend-row > .unit-chip {
+    width: 72px;
+}
+
+/* ---------------------------------------------------------------- 원격 조작 */
+.remote-col {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.remote-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.remote-floor {
+    width: 48px;
+}
+
+.switch-btn {
+    width: 170px;
+    margin-right: var(--space-xs);
+}
+
+.switch-btn.on {
+    background-color: rgb(92, 84, 44);
+    border-color: var(--color-accent);
+    color: rgb(255, 240, 200);
+}
+
+.switch-btn.locked {
+    background-color: rgb(92, 38, 32);
+    border-color: var(--color-danger);
+    color: rgb(255, 225, 220);
+}
+
+.elev-call {
+    width: 70px;
+    margin-right: var(--space-xs);
+}
+
+.elev-state {
+    color: var(--color-text-dim);
+    margin-top: var(--space-xs);
+}
+
+/* ---------------------------------------------------------------- 도면 */
+.plan-floors {
+    width: 84px;
+    margin-right: var(--space-sm);
+}
+
+.plan-floor-btn.selected {
+    background-color: var(--color-accent-dim);
+    border-color: var(--color-accent);
+}
+
+.floor-plan {
+    flex-grow: 1;
+    background-color: rgb(12, 15, 14);
+    border-width: 1px;
+    border-color: rgb(34, 42, 38);
+}
+
+.plan-text-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.plan-text {
+    position: absolute;
+    translate: -50% -50%;
+    padding: 0;
+    margin: 0;
+    white-space: nowrap;
+    color: var(--color-text);
+    font-size: 14px;
+}
+
+.plan-text--unit {
+    font-size: 16px;
+}
+
+.plan-text--sm {
+    font-size: 12px;
+}
+
+.plan-text--floor {
+    font-size: 30px;
+}
+
+.plan-text--dim {
+    color: var(--color-text-dim);
+}
+
+.plan-text--open {
+    color: rgb(84, 133, 184);
+}
+
+.plan-text--red {
+    color: rgb(219, 77, 66);
+}
+
+.plan-text--yellow {
+    color: rgb(242, 199, 51);
+}
+
+.plan-legend {
+    width: 250px;
+    margin-left: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------- 전원 꺼짐 (흉내쟁이) */
+.power-out-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(0, 0, 0);
+    align-items: center;
+    justify-content: center;
+}
+
+.power-out-text {
+    color: rgb(80, 80, 80);
+    font-size: var(--font-lg);
+}

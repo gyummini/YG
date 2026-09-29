@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbde2f2a052e20a45ba5c638b4cab4c6, type: 3}
+  m_Name: TallOne
+  m_EditorClassIdentifier: NightOffice::NightOffice.EntityDefinition
+  id: 1
+  displayName: "\uD0A4\uB2E4\uB9AC"
+  bundle: 1
+  category: 0
+  pictogram: e_tallone
+  nature: "\uC2DC\uC120\uC5D0 \uBC18\uC751\uD55C\uB2E4."
+  clues:
+  - attr: 0
+    value: "\uBCF5\uB3C4\uC5D0\uC11C \uD0A4 \uD070 \uD615\uCCB4\uAC00 \uB2E4\uAC00\uC628\uB2E4"
+    expensive: 0
+    how: 
+  - attr: 1
+    value: "\uBB38\uD2C0\uBCF4\uB2E4 \uD07C"
+    expensive: 0
+    how: 
+  - attr: 3
+    value: "\uC5C6\uC74C"
+    expensive: 0
+    how: "\uBA48\uCDB0 \uC11C\uC11C \uB4E4\uC5B4\uC57C \uD55C\uB2E4."
+  - attr: 2
+    value: "6\uAC1C"
+    expensive: 1
+    how: "\uC190\uC5D0 \uC190\uC804\uB4F1\uC744 \uBE44\uCD94\uACE0 \uAC00\uAE4C\uC774 \uC62C \uB54C\uAE4C\uC9C0 \uAE30\uB2E4\uB824\uC57C \uD55C\uB2E4. \uC5BC\uAD74\uC740 \uBE44\uCD94\uC9C0 \uC54A\uB294\uB2E4."
+  condition: "\uC870\uBA85 (\uD604\uC7A5\uC774 \uC120 \uAD6C\uAC04)"
+  common:
+    when: 
+    text: "\uC190\uC804\uB4F1\uC744 \uCF1C\uACE0 \uC788\uC73C\uBA74 \uBA3C\uC800 \uBC14\uB2E5\uC5D0 \uB0B4\uB824\uB193\uAE30."
+    pictograms:
+    - a_flashlight_floor
+  branches:
+  - when: "\uBD88 \uCF1C\uC9D0"
+    text: "\uB208\uC744 \uB9C8\uC8FC\uCE5C \uCC44 \uADF8 \uC790\uB9AC\uC5D0\uC11C \uBC84\uD2F0\uAE30. \uC2DC\uC120\uC744 \uB5BC\uC9C0 \uC54A\uC73C\uBA74 \uD0A4\uB2E4\uB9AC\uAC00 \uBA3C\uC800 \uBB3C\uB7EC\uB09C\uB2E4."
+    pictograms:
+    - a_eyecontact
+    - a_standstill
+  - when: "\uBD88 \uAEBC\uC9D0"
+    text: "\uC0C1\uD669\uC2E4\uC5D0 \uADF8 \uAD6C\uAC04 \uC870\uBA85\uC744 \uCF1C \uB2EC\uB77C\uACE0 \uD55C \uB4A4 \uBD88 \uCF1C\uC9D0 \uB300\uC751. \uCF1C\uC9C8 \uB54C\uAE4C\uC9C0\uB294 \uACE0\uAC1C\uB97C \uC219\uC774\uACE0 \uC81C\uC790\uB9AC."
+    pictograms:
+    - a_lights_on
+    - a_headdown
+    - a_standstill
+  hasWarning: 1
+  warning: "\uAC78\uC74C\uC774 \uBE68\uB77C\uC9C0\uACE0 \uBAA9 \uAEBE\uC774\uB294 \uC18C\uB9AC."
+  variants: []
