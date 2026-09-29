@@ -67,6 +67,26 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Local test artifacts (autotest reports, screenshots)
+# Burst debug info
+*_BurstDebugInformation_DoNotShip/
+
+# Unity test runner / MPPM temp
+/.utmp/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python caches (Tools/audio_synth.py)
+__pycache__/
+*.pyc
+
+# Service credentials written by Project Settings > Services > Vivox (the token key must never be public)
+/ProjectSettings/Packages/com.unity.services.vivox/Settings.json
+
+# Local test artifacts (autotest reports, screenshots) and agent helper scripts
 /TestResults/
 /AgentScripts/
