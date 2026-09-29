@@ -17,6 +17,9 @@ namespace NightOffice
         /// <summary>The UI registers itself here so automated tests can drive the screens.</summary>
         public static IOfficeScreensTest Test { get; set; }
 
+        /// <summary>The result screen (UI assembly) registers itself here for automated tests.</summary>
+        public static IResultsScreenTest Results { get; set; }
+
         public static void Open(OfficeScreen screen) => OpenRequested?.Invoke(screen);
     }
 
@@ -33,36 +36,15 @@ namespace NightOffice
         void TestShowPage(int page);
         void TestPlanFloor(int floor);
         string TestRegisteredText { get; }
+        int TestComplaintRows { get; }
+        bool TestReply(byte id, bool dispatch);
     }
 
-    /// <summary>단말기: the control-room player sits down at the monitor (E). Manual, gauges, remote controls, floor plan.</summary>
-    public class TerminalInteract : InteractableBehaviour
+    /// <summary>What automated tests may read from the result screen.</summary>
+    public interface IResultsScreenTest
     {
-        public override string Prompt(PlayerNet p) => p != null && p.Role == Role.Control ? "단말기 사용" : null;
-
-        public override void Interact(PlayerNet p) => OfficeScreens.Open(OfficeScreen.Terminal);
-    }
-
-    /// <summary>팩스: both players read the shift fax (rules + tonight's knock codes).</summary>
-    public class FaxInteract : InteractableBehaviour
-    {
-        public override string Prompt(PlayerNet p) => ShiftFax.I != null && ShiftFax.I.Printed ? "팩스 읽기" : "팩스 (아직 안 옴)";
-
-        public override void Interact(PlayerNet p)
-        {
-            if (ShiftFax.I != null && ShiftFax.I.Printed) OfficeScreens.Open(OfficeScreen.Fax);
-        }
-    }
-
-    /// <summary>배전함: hold E to reset the floor's breaker (clears 누전, revives the floor's eaten lights).</summary>
-    public class ElectricPanel : InteractableBehaviour
-    {
-        public int floor;
-
-        public override string Prompt(PlayerNet p) => p != null && p.Role == Role.Field ? $"배전함 리셋 ({floor}층)" : null;
-
-        public override float HoldSeconds(PlayerNet p) => GameSettings.I.entities.panelHoldSec;
-
-        public override void Interact(PlayerNet p) => LightingNet.I?.RequestPanelResetRpc(floor);
+        bool Shown { get; }
+        string TitleText { get; }
+        string CountText { get; }
     }
 }

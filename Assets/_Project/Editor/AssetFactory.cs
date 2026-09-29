@@ -265,8 +265,12 @@ namespace NightOffice.EditorTools
             MakeEmissive(lit, "WindowTV", new Color(0.1f, 0.14f, 0.2f), new Color(0.7f, 1.1f, 1.9f));
             MakeEmissive(lit, "LampHead", new Color(0.4f, 0.3f, 0.15f), new Color(3.2f, 2.1f, 0.9f));
             MakeEmissive(lit, "ExitSign", new Color(0.08f, 0.35f, 0.15f), new Color(0.35f, 1.6f, 0.6f));
-            var mirrorShader = Shader.Find("NightOffice/MirrorScreenSpace");
+            var mirrorShader = Shader.Find("NightOffice/Mirror");
             if (mirrorShader != null) MakeMat(mirrorShader, "Mirror", m => m.SetColor("_Tint", new Color(0.82f, 0.86f, 0.9f, 1f)));
+            // 동승자 / 뒷사람 (Models/Person.fbx: Body, Skin, Eyes)
+            MakeLit(lit, "PersonBody", new Color(0.045f, 0.045f, 0.05f), 0.1f);
+            MakeLit(lit, "PersonSkin", new Color(0.72f, 0.71f, 0.68f), 0.25f);
+            MakeLit(lit, "PersonEyes", new Color(0.005f, 0.005f, 0.005f), 0.7f);
             if (unlit != null) MakeMat(unlit, "Black", m => m.SetColor("_BaseColor", Color.black));
         }
 

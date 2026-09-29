@@ -19,6 +19,8 @@ namespace NightOffice
         Registry = 10,       // 세대 명부
         Mirror = 11,         // 거울
         Place = 12,          // 장소
+        KnockCode = 13,      // 노크 암호
+        ReturnTime = 14,     // 돌아올 시각
     }
 
     public static class ClueAttrText
@@ -40,12 +42,16 @@ namespace NightOffice
                 case ClueAttr.Registry: return "세대 명부";
                 case ClueAttr.Mirror: return "거울";
                 case ClueAttr.Place: return "장소";
+                case ClueAttr.KnockCode: return "노크 암호";
+                case ClueAttr.ReturnTime: return "돌아올 시각";
                 default: return a.ToString();
             }
         }
 
         /// <summary>Checked in the field (true) or read in the control room (false).</summary>
-        public static bool FieldSide(ClueAttr a) => a != ClueAttr.CabCount && a != ClueAttr.FloorPower && a != ClueAttr.CardLog && a != ClueAttr.Registry;
+        public static bool FieldSide(ClueAttr a) =>
+            a != ClueAttr.CabCount && a != ClueAttr.FloorPower && a != ClueAttr.CardLog && a != ClueAttr.Registry &&
+            a != ClueAttr.KnockCode && a != ClueAttr.ReturnTime;
     }
 
     /// <summary>

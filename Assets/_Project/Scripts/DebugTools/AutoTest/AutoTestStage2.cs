@@ -94,7 +94,8 @@ namespace NightOffice
 
             // ---------------------------------------------------------------- 1) terminal + manual
             var term = Object.FindAnyObjectByType<TerminalInteract>();
-            Check("단말기 안내는 상황실에게만", term != null && term.Prompt(control) == "단말기 사용" && term.Prompt(field) == null, "");
+            Check("단말기 안내는 상황실에게만", term != null && term.Prompt(control) == "단말기 사용" && term.Prompt(field) == null,
+                term == null ? "TerminalInteract 없음" : $"상황실='{term.Prompt(control)}' 현장='{term.Prompt(field)}'");
             OfficeScreens.Open(OfficeScreen.Terminal);
             yield return new WaitForSeconds(0.8f);
             Check("단말기 열림 · 이동/시선 차단", ui != null && ui.TerminalOpen && UIState.BlocksGameplay, "");

@@ -53,6 +53,8 @@ namespace NightOffice
             if (PlayerNet.All.Count >= 2)
             {
                 yield return new WaitForSeconds(2f);
+                MimicDirector.TestForce = false; // no surprise knocks (and power cuts) in suites that do not test it
+                CheckNoMissingScripts();
                 IEnumerator suite = null;
                 switch (m_Request.suite)
                 {
@@ -61,11 +63,28 @@ namespace NightOffice
                     case "stage3": suite = Stage3(); break;
                     case "online": suite = Online(); break;
                     case "map": suite = MapSuite(); break;
+                    case "loop": suite = LoopSuite(); break;
                 }
                 if (suite != null) yield return StartCoroutine(Guard(suite));
                 else Note("unknown suite " + m_Request.suite);
             }
             Finish();
+        }
+
+        /// <summary>Every component in the running scene still has its script (a class in a file of another name can lose it).</summary>
+        void CheckNoMissingScripts()
+        {
+            int missing = 0;
+            string where = "";
+            foreach (var go in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                foreach (var t in go.GetComponentsInChildren<Transform>(true))
+                    foreach (var c in t.GetComponents<Component>())
+                        if (c == null)
+                        {
+                            missing++;
+                            if (where.Length < 200) where += t.name + " ";
+                        }
+            Check("씬에 스크립트가 빠진 컴포넌트 없음", missing == 0, missing == 0 ? "" : $"{missing}개: {where}");
         }
 
         /// <summary>Runs a suite, turning an exception into a failed check instead of a silent stop.</summary>

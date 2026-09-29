@@ -1,5 +1,5 @@
-// Planar mirror: samples the reflection camera's render texture in screen space (x flipped).
-Shader "NightOffice/MirrorScreenSpace"
+// Elevator mirror: shows MirrorView's render texture across the quad, flipped left-right like a real mirror.
+Shader "NightOffice/Mirror"
 {
     Properties
     {
@@ -28,27 +28,26 @@ Shader "NightOffice/MirrorScreenSpace"
             struct Attributes
             {
                 float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
-                float4 screenPos : TEXCOORD0;
+                float2 uv : TEXCOORD0;
             };
 
             Varyings vert(Attributes input)
             {
                 Varyings o;
                 o.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-                o.screenPos = ComputeScreenPos(o.positionCS);
+                o.uv = float2(1.0 - input.uv.x, input.uv.y);
                 return o;
             }
 
             half4 frag(Varyings i) : SV_Target
             {
-                float2 uv = i.screenPos.xy / i.screenPos.w;
-                uv.x = 1.0 - uv.x;
-                half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+                half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
                 return half4(c.rgb * _Tint.rgb, 1.0);
             }
             ENDHLSL

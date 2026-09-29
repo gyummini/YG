@@ -2,12 +2,21 @@ using UnityEngine;
 
 namespace NightOffice
 {
-    /// <summary>E on a door leaf: inside handle, knock (office, outside), or card swipe (fire/unit doors).</summary>
+    /// <summary>
+    /// E on a door leaf: inside handle, knock (office, outside), card swipe (fire/unit doors), or — at a resident's
+    /// door with an open complaint — 민원 확인 (hold E).
+    /// </summary>
     public class DoorInteract : InteractableBehaviour
     {
         public Door door;
 
         public override Vector3 InteractPoint => door != null ? door.Center : transform.position;
+
+        bool ComplaintHere(PlayerNet p) =>
+            door != null && door.kind == DoorKind.Unit && p != null && p.Role == Role.Field && !door.IsInsideSide(p.HeadPosition) &&
+            ComplaintBoard.I != null && ComplaintBoard.I.IsSpawned && ComplaintBoard.I.HasOpenVisit(door.unitNumber);
+
+        public override float HoldSeconds(PlayerNet p) => ComplaintHere(p) ? GameSettings.I.night.complaintCheckHoldSec : 0f;
 
         public override string Prompt(PlayerNet p)
         {
@@ -20,6 +29,7 @@ namespace NightOffice
                     return "노크";
                 case DoorKind.Unit:
                     if (inside) return door.IsOpen.Value ? "문 닫기" : "문 열기";
+                    if (ComplaintHere(p)) return $"민원 확인 ({door.label})";
                     return door.IsOpen.Value ? null : $"카드 찍기 ({door.label})";
                 case DoorKind.Fire:
                     if (door.IsOpen.Value) return door.holdOpen ? "문 닫기" : null;
@@ -41,6 +51,7 @@ namespace NightOffice
                     break;
                 case DoorKind.Unit:
                     if (inside) door.RequestToggleRpc();
+                    else if (ComplaintHere(p)) ComplaintBoard.I.RequestCheckRpc(door.unitNumber);
                     else door.RequestSwipeRpc();
                     break;
                 case DoorKind.Fire:
@@ -52,15 +63,5 @@ namespace NightOffice
                     break;
             }
         }
-    }
-
-    /// <summary>Stand-alone card reader (관리사무소 출입문 옆): records a swipe without opening anything.</summary>
-    public class CardReaderInteract : InteractableBehaviour
-    {
-        public Door door;
-
-        public override string Prompt(PlayerNet p) => door != null && !door.IsInsideSide(p.HeadPosition) ? $"카드 찍기 ({door.label})" : null;
-
-        public override void Interact(PlayerNet p) => door?.RequestSwipeRpc();
     }
 }

@@ -10,7 +10,9 @@
                     <ui:Button name="tabGauges" class="term-tab" text="계기판" />
                     <ui:Button name="tabRemote" class="term-tab" text="원격 조작" />
                     <ui:Button name="tabPlan" class="term-tab" text="도면" />
+                    <ui:Button name="tabComplaints" class="term-tab" text="민원" />
                 </ui:VisualElement>
+                <ui:Label name="termHandled" class="term-handled" />
                 <ui:Label name="termStatus" class="term-status" />
                 <ui:Button name="termClose" text="닫기 (Esc)" />
             </ui:VisualElement>
@@ -109,6 +111,20 @@
                             <ui:Label class="panel-caption" text="방화문 잠금 (잠그면 닫히고 카드로 안 열림)" />
                             <ui:VisualElement name="doorRows" />
                         </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="pageComplaints" class="term-page hidden">
+                    <ui:VisualElement class="panel-box complaint-panel">
+                        <ui:Label class="panel-caption" text="민원 메신저 (주민 → 관리사무소)" />
+                        <ui:Label name="complaintEmpty" class="dim-note" text="아직 들어온 민원이 없습니다." />
+                        <ui:ScrollView name="complaintList" class="complaint-list" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="panel-box complaint-help">
+                        <ui:Label class="panel-caption" text="답장" />
+                        <ui:Label class="dim-note" text="[순찰 보냄] 다음에 현장이 나갈 때 이 민원으로 출동합니다. 민원 내용은 그때 만날 상황의 힌트입니다." />
+                        <ui:Label class="dim-note" text="[기다려 주세요] 주민을 기다리게 합니다. 나중에 순찰을 보낼 수 있습니다." />
+                        <ui:Label class="dim-note" text="처리: 현장이 그 세대 문 앞에서 '민원 확인'. 엘리베이터 민원은 엘리베이터를 타고 그 층까지." />
                     </ui:VisualElement>
                 </ui:VisualElement>
 

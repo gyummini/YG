@@ -125,12 +125,13 @@ namespace NightOffice.EditorTools
         static void WireOfficeUi()
         {
             if (s_UiRoot == null) return;
-            var screens = new[] { "Terminal", "Fax" }
+            var screens = new[] { "Terminal", "Fax", "Results" }
                 .Select(n => AssetDatabase.LoadAssetAtPath<VisualTreeAsset>($"{AssetFactory.Root}/UI/Screens/{n}.uxml"))
                 .Where(v => v != null)
                 .ToList();
             s_UiRoot.extraScreens = screens;
             s_UiRoot.gameObject.AddComponent<OfficeScreensController>();
+            s_UiRoot.gameObject.AddComponent<ResultsScreen>();
         }
     }
 }

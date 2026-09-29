@@ -82,6 +82,7 @@ namespace NightOffice.EditorTools
             BuildExterior();
             BuildSystems(elevator);
             BuildExtras();
+            BuildStage3(elevator);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             BuildNavMesh(elevator);
@@ -118,6 +119,9 @@ namespace NightOffice.EditorTools
 
         /// <summary>Extension point for later stages (entities, terminal...).</summary>
         static partial void BuildExtras();
+
+        /// <summary>Stage 3: 묶음 B·D bodies, the elevator mirror, complaints, 흉내쟁이, results screen.</summary>
+        static partial void BuildStage3(Elevator elevator);
 
         static void SetupLighting()
         {

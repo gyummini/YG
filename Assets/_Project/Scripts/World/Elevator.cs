@@ -20,6 +20,13 @@ namespace NightOffice
         Closing = 3,
     }
 
+    public enum ElevatorRemote : byte
+    {
+        Call = 0,
+        Stop = 1,
+        Close = 2,
+    }
+
     public struct ElevatorNetState : INetworkSerializable, IEquatable<ElevatorNetState>
     {
         public float FromY;
@@ -74,6 +81,16 @@ namespace NightOffice
         public float slideDistance = 0.6f;
 
         public readonly NetworkVariable<ElevatorNetState> State = new NetworkVariable<ElevatorNetState>();
+        /// <summary>동승자 aboard: its figure shows in the cab mirror (and only there).</summary>
+        public readonly NetworkVariable<bool> PassengerAboard = new NetworkVariable<bool>(false);
+
+        [Header("묶음 B")]
+        [Tooltip("Mirror quad on the cab wall (visible face toward the cab).")]
+        public Transform mirror;
+        [Tooltip("동승자 figure (MirrorOnly layer), child of the cab.")]
+        public GameObject passenger;
+        [Tooltip("Between the passenger's eyes.")]
+        public Transform passengerHead;
 
         // ---- server-only controller state
         readonly bool[] m_CarCall = new bool[5];
@@ -101,6 +118,8 @@ namespace NightOffice
         public event Action<int> ServerDoorsClosed;
         /// <summary>(kind, floor, clientId) — floor is the requested floor for CarFloor/HallCall.</summary>
         public event Action<ElevatorButtonKind, int, ulong> ServerButton;
+        /// <summary>(kind, floor) after the control room's remote control took effect (handlers may override it).</summary>
+        public event Action<ElevatorRemote, int> ServerRemoteUsed;
 
         float m_LastCabY;
         public float CabDeltaY { get; private set; }
@@ -193,6 +212,7 @@ namespace NightOffice
                 m_LastCabY = pos.y;
             }
             AnimateDoors();
+            if (passenger != null && passenger.activeSelf != PassengerAboard.Value) passenger.SetActive(PassengerAboard.Value);
             if (motorHum != null) motorHum.Active = IsMoving;
             if (IsServer && IsSpawned) ServerTick();
         }
@@ -454,6 +474,32 @@ namespace NightOffice
         // ================================================================ server API (anomalies / remote)
         public void ServerRequestAnomalyStop(int floor) => m_AnomalyStopFloor = floor;
 
+        /// <summary>A floor button is lit inside the cab.</summary>
+        public bool HasCarCall(int floor) => floor >= 1 && floor <= 4 && m_CarCall[floor];
+
+        /// <summary>
+        /// 묶음 B: open at a floor nobody pressed. Called as the cab departs: a floor before the destination becomes an
+        /// unscheduled stop; a floor beyond it becomes an express target (the destination is passed and served after).
+        /// </summary>
+        public void ServerAnomalyDetour(int floor)
+        {
+            var st = State.Value;
+            int dir = st.Dir, dest = st.TargetFloor;
+            if (dir != 0 && (dest - floor) * dir > 0) m_AnomalyStopFloor = floor;
+            else m_Express = floor;
+        }
+
+        /// <summary>동승자 decides where the cab goes: every call is dropped and the cab heads for the target.</summary>
+        public void ServerPassengerTakeOver(int target)
+        {
+            for (int f = 0; f < 5; f++) m_CarCall[f] = m_HallCall[f] = false;
+            m_Express = target;
+            m_StopNext = false;
+            m_AnomalyStopFloor = 0;
+        }
+
+        public void ServerCancelExpress() => m_Express = 0;
+
         public void ServerSetHoldOpen(bool hold)
         {
             m_HoldOpen = hold;
@@ -507,6 +553,7 @@ namespace NightOffice
             float y = BuildingLayout.FloorY(floor);
             State.Value = new ElevatorNetState { FromY = y, ToY = y, DoorState = (byte)ElevatorDoorState.Closed, DoorChange = Now, TargetFloor = (byte)floor };
             m_ExtraOccupants = 0;
+            PassengerAboard.Value = false;
         }
 
         public int PendingTargetFloor => State.Value.TargetFloor;
@@ -563,6 +610,7 @@ namespace NightOffice
             m_Express = floor;
             ServerButton?.Invoke(ElevatorButtonKind.HallCall, floor, rpcParams.Receive.SenderClientId);
             GameLog.Info("Remote", $"엘리베이터 {floor}층 호출");
+            ServerRemoteUsed?.Invoke(ElevatorRemote.Call, floor);
         }
 
         /// <summary>원격 조작: 정지 (stop at the next floor).</summary>
@@ -573,6 +621,7 @@ namespace NightOffice
             if (LightingNet.I != null && LightingNet.I.OfficePowerOut.Value) return;
             if (IsMoving) m_StopNext = true;
             GameLog.Info("Remote", "엘리베이터 정지");
+            ServerRemoteUsed?.Invoke(ElevatorRemote.Stop, 0);
         }
 
         /// <summary>원격 조작: 문 닫기.</summary>
@@ -581,12 +630,11 @@ namespace NightOffice
         {
             if (!RoleManager.SenderIs(rpcParams, Role.Control)) return;
             if (LightingNet.I != null && LightingNet.I.OfficePowerOut.Value) return;
-            RemoteClosed?.Invoke();
             ServerCloseDoorsNow();
             GameLog.Info("Remote", "엘리베이터 문 닫기");
+            ServerRemoteUsed?.Invoke(ElevatorRemote.Close, 0);
         }
 
-        public event Action RemoteClosed;
 
         [Rpc(SendTo.Everyone)]
         void PlayArriveRpc(int floor)

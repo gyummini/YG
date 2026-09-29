@@ -201,6 +201,30 @@ namespace NightOffice
             else d.RequestToggleRpc();
         }
 
+        /// <summary>Client side: press an elevator button (cab panel or hall call), like pressing E on it.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientElevatorPressRpc(ElevatorButtonKind kind, int floor) => Elevator.I?.PressRpc(kind, floor);
+
+        /// <summary>Client side: finish holding E at a resident's door with an open complaint.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientComplaintCheckRpc(int unit) => ComplaintBoard.I?.RequestCheckRpc(unit);
+
+        /// <summary>Client side: knock a code ("2-1-3") on the office door from outside, one E press per knock.</summary>
+        [Rpc(SendTo.NotServer)]
+        public void ClientKnockCodeRpc(string code) => StartCoroutine(KnockCode(code));
+
+        System.Collections.IEnumerator KnockCode(string code)
+        {
+            var door = Door.ByKey("office");
+            if (door == null) yield break;
+            float t0 = Time.time;
+            foreach (var o in MimicDirector.OffsetsFor(code))
+            {
+                while (Time.time - t0 < o) yield return null;
+                door.KnockRpc();
+            }
+        }
+
         /// <summary>Client side: finish holding E at an electric panel.</summary>
         [Rpc(SendTo.NotServer)]
         public void ClientPanelResetRpc(int floor) => LightingNet.I?.RequestPanelResetRpc(floor);

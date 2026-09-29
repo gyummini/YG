@@ -42,6 +42,23 @@ SUBJECTS = {
     "a_upstairs": "a person climbing a staircase upward, with a bold arrow pointing up the stairs.",
     "a_lure_below": "a staircase: a person standing at the top, and a lit lamp with rays on the lower floor at the bottom.",
     "a_panel_reset": "a hand pushing up a breaker lever inside an open electrical panel box.",
+    # stage 3: 묶음 B (빈 층 · 동승자), D (뒷사람 · 울림), 흉내쟁이
+    "e_emptyfloor": "an elevator car seen from the front with both doors wide open and nobody inside; outside the doors an empty corridor floor line.",
+    "e_passenger": "inside an elevator car: one person standing facing the closed doors, and behind them a second figure drawn only as a dashed outline, also visible in a mirror on the side wall.",
+    "e_follower": "a person walking forward, and right behind them a second set of footprints following exactly in step with no one standing there.",
+    "e_echo": "a person walking up a staircase, with faint curved sound-wave arcs rising from the empty stairs below and fading out.",
+    "e_mimic": "a closed door seen from the inside with three small impact marks near its middle (knocking), and a hollow dashed outline of a person standing outside behind the door.",
+    "a_no_buttons": "a hand reaching toward a vertical column of round elevator buttons, crossed by one bold diagonal slash.",
+    "a_remote_close": "a small desktop computer monitor on the left and, on the right, elevator doors sliding shut with two arrows pointing toward each other.",
+    "a_no_talk": "a handheld walkie-talkie next to an open mouth, crossed by one bold diagonal slash.",
+    "a_no_lookback": "a person seen from the side turning their head back over their shoulder, crossed by one bold diagonal slash.",
+    "a_ride_down": "an elevator car with a bold arrow pointing straight down beside it toward a thick ground line at the bottom.",
+    "a_stop_nearest": "an elevator car in a shaft with a raised open-palm stop hand beside it and a short bar marking the next floor.",
+    "a_walk_out": "a person walking straight forward out through open elevator doors, with a bold arrow pointing forward.",
+    "a_ptt_release": "a hand opening its fingers away from the push-to-talk button on the side of a walkie-talkie, with small release lines.",
+    "a_walk_in_step": "a person walking forward with a steady stride above a row of evenly spaced footprints.",
+    "a_ignore": "a person walking forward without turning, faint curved sound-wave arcs behind them, a bold arrow pointing forward.",
+    "a_dont_open": "a closed door with a door handle, crossed by one bold diagonal slash.",
 }
 
 

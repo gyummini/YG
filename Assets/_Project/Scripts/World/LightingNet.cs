@@ -216,6 +216,35 @@ namespace NightOffice
             DeadMask.Value = default;
             FaultMask.Value = 0;
             OfficePowerOut.Value = false;
+            m_PowerBackAt = -1f;
+        }
+
+        float m_PowerBackAt = -1f;
+
+        /// <summary>흉내쟁이에게 문을 열면: office lights, terminal and gauges die for a while (remote controls too).</summary>
+        public void ServerOfficePowerOut(float seconds)
+        {
+            if (!IsServer) return;
+            OfficePowerOut.Value = true;
+            m_PowerBackAt = Time.time + seconds;
+            OfficePowerSoundRpc(false);
+        }
+
+        public float OfficePowerBackIn => OfficePowerOut.Value && m_PowerBackAt > 0f ? Mathf.Max(0f, m_PowerBackAt - Time.time) : 0f;
+
+        void LateUpdate()
+        {
+            if (!IsServer || m_PowerBackAt < 0f || Time.time < m_PowerBackAt) return;
+            m_PowerBackAt = -1f;
+            OfficePowerOut.Value = false;
+            OfficePowerSoundRpc(true);
+            GameLog.Info("Power", "상황실 전원 복구");
+        }
+
+        [Rpc(SendTo.Everyone)]
+        void OfficePowerSoundRpc(bool up)
+        {
+            AudioService.I?.PlayAt(up ? SfxId.PowerUp : SfxId.PowerDown, BuildingLayout.TerminalScreen, 1f);
         }
 
         /// <summary>Night start: office and 1F on, every upper corridor section rolled independently.</summary>

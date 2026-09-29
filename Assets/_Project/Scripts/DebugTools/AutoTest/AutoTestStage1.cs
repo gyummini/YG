@@ -276,10 +276,5 @@ namespace NightOffice
             ReleaseInputs();
         }
 
-        IEnumerator Stage3()
-        {
-            Note("stage3 suite not implemented yet");
-            yield break;
-        }
     }
 }

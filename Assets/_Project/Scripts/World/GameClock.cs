@@ -48,6 +48,14 @@ namespace NightOffice
             Running.Value = false;
         }
 
+        /// <summary>Tests / debug: jump the running clock to a time of night.</summary>
+        public void ServerSetMinutes(float minutes)
+        {
+            if (!IsServer || !Running.Value) return;
+            double sec = minutes / NightMinutes * Mathf.Max(1f, GameSettings.I.night.realSecondsPerNight);
+            StartServerTime.Value = NetworkManager.ServerTime.Time - sec;
+        }
+
         public void ServerReset()
         {
             if (!IsServer) return;

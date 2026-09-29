@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ed62d73e8d654641ba542cccff799f8, type: 3}
+  m_Name: ComplaintCatalog
+  m_EditorClassIdentifier: NightOffice::NightOffice.ComplaintCatalog
+  entries:
+  - bundle: 1
+    task: 0
+    text: "\uBCF5\uB3C4 \uB05D\uC5D0 \uD0A4 \uD070 \uC0AC\uB78C\uC774 \uC11C \uC788\uC5B4\uC694. \uD55C\uCC38 \uC548 \uC6C0\uC9C1\uC5EC\uC694."
+  - bundle: 1
+    task: 0
+    text: "\uBB38\uAD6C\uBA4D\uC73C\uB85C \uBCF4\uB2C8\uAE4C \uBCF5\uB3C4\uC5D0 \uB204\uAC00 \uCC9C\uCC9C\uD788 \uAC78\uC5B4\uC640\uC694. \uBB38\uD2C0\uBCF4\uB2E4 \uCEE4\uC694."
+  - bundle: 2
+    task: 1
+    text: "\uC5D8\uB9AC\uBCA0\uC774\uD130\uAC00 \uC544\uBB34\uB3C4 \uC548 \uB20C\uB800\uB294\uB370 {floor}\uCE35\uC5D0\uC11C \uC5F4\uB838\uB2E4 \uB2EB\uD600\uC694. \uD55C\uBC88 \uD0C0 \uBCF4\uACE0 \uD655\uC778\uD574 \uC8FC\uC138\uC694."
+  - bundle: 2
+    task: 1
+    text: "\uC5D8\uB9AC\uBCA0\uC774\uD130 \uBA48\uCDA4 \uC2E0\uACE0. \uD0C0\uACE0 {floor}\uCE35\uAE4C\uC9C0 \uC640 \uBCF4\uC2DC\uBA74 \uC54C\uC544\uC694."
+  - bundle: 3
+    task: 0
+    text: "\uBCF5\uB3C4 \uBD88\uC774 \uD55C\uCABD \uB05D\uBD80\uD130 \uD558\uB098\uC529 \uAEBC\uC838\uC694."
+  - bundle: 3
+    task: 0
+    text: "{floor}\uCE35 \uBCF5\uB3C4 \uC870\uBA85\uC774 \uAE5C\uBE61\uC774\uACE0 \uC804\uAE30\uAC00 \uC774\uC0C1\uD574\uC694."
+  - bundle: 4
+    task: 0
+    text: "\uACC4\uB2E8\uC5D0\uC11C \uB204\uAC00 \uB530\uB77C \uC62C\uB77C\uC624\uB294 \uC18C\uB9AC\uAC00 \uB098\uC694. \uB3CC\uC544\uBCF4\uBA74 \uC544\uBB34\uB3C4 \uC5C6\uC5B4\uC694."
+  - bundle: 4
+    task: 0
+    text: "\uBC24\uB9C8\uB2E4 \uBCF5\uB3C4\uC5D0\uC11C \uBC1C\uC18C\uB9AC\uAC00 \uB098\uB294\uB370 \uB098\uAC00 \uBCF4\uBA74 \uC544\uBB34\uB3C4 \uC5C6\uC5B4\uC694."

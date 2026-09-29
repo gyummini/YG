@@ -8,6 +8,10 @@
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_backtowall.png");
 }
 
+.picto--a_dont_open {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_dont_open.png");
+}
+
 .picto--a_enterroom {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_enterroom.png");
 }
@@ -28,6 +32,10 @@
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_headdown.png");
 }
 
+.picto--a_ignore {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_ignore.png");
+}
+
 .picto--a_lights_off {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_lights_off.png");
 }
@@ -40,12 +48,40 @@
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_lure_below.png");
 }
 
+.picto--a_no_buttons {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_no_buttons.png");
+}
+
+.picto--a_no_lookback {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_no_lookback.png");
+}
+
+.picto--a_no_talk {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_no_talk.png");
+}
+
 .picto--a_panel_reset {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_panel_reset.png");
 }
 
+.picto--a_ptt_release {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_ptt_release.png");
+}
+
+.picto--a_remote_close {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_remote_close.png");
+}
+
+.picto--a_ride_down {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_ride_down.png");
+}
+
 .picto--a_standstill {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_standstill.png");
+}
+
+.picto--a_stop_nearest {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_stop_nearest.png");
 }
 
 .picto--a_upstairs {
@@ -56,12 +92,40 @@
     background-image: url("project://database/Assets/_Project/UI/Pictograms/a_wait.png");
 }
 
+.picto--a_walk_in_step {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_walk_in_step.png");
+}
+
+.picto--a_walk_out {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/a_walk_out.png");
+}
+
+.picto--e_echo {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/e_echo.png");
+}
+
+.picto--e_emptyfloor {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/e_emptyfloor.png");
+}
+
 .picto--e_escort {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/e_escort.png");
 }
 
+.picto--e_follower {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/e_follower.png");
+}
+
 .picto--e_lighteater {
     background-image: url("project://database/Assets/_Project/UI/Pictograms/e_lighteater.png");
+}
+
+.picto--e_mimic {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/e_mimic.png");
+}
+
+.picto--e_passenger {
+    background-image: url("project://database/Assets/_Project/UI/Pictograms/e_passenger.png");
 }
 
 .picto--e_short {

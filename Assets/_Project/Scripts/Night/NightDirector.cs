@@ -5,8 +5,9 @@ using UnityEngine;
 namespace NightOffice
 {
     /// <summary>
-    /// One night: 00:00 → 04:00. Resets the building, rolls the night (세대 명부, lights), starts the clock.
-    /// Stage 3 adds the fax, complaints, bundles-on-exit, mimic and the result screen.
+    /// One night: 00:00 → 04:00. Resets the building (doors, 세대 명부, lights, elevator, card log, knocks, bundles,
+    /// 흉내쟁이, 민원), prints the shift fax and starts the clock. Ends at 04:00 (퇴근) or a few seconds after the field
+    /// vanishes; both players then see the result screen (처리한 민원).
     /// </summary>
     public class NightDirector : NetSingleton<NightDirector>
     {
@@ -66,6 +67,8 @@ namespace NightOffice
             RadioNet.I?.ServerForceRelease();
             KnockLog.Clear();
             EntityDirector.I?.ServerReset();
+            MimicDirector.I?.ServerReset();
+            ComplaintBoard.I?.ServerReset(rng);
             ShiftFax.I?.ServerPrint(rng);
 
             int i = 0;
@@ -77,6 +80,14 @@ namespace NightOffice
                 p.TeleportRpc(sp, 90f);
                 i++;
             }
+        }
+
+        void Update()
+        {
+            // 04:00 → 퇴근
+            if (IsServer && IsSpawned && Phase.Value == NightPhase.Running && GameClock.I != null && GameClock.I.Running.Value &&
+                GameClock.MinutesNow >= GameClock.NightMinutes)
+                ServerEndNight(NightOutcome.Completed);
         }
 
         public void ServerEndNight(NightOutcome outcome)

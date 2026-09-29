@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="Results.uss" />
+    <ui:VisualElement name="resultsScreen" class="screen results-screen hidden">
+        <ui:VisualElement class="results-panel">
+            <ui:Label name="resultTitle" class="result-title" text="퇴근" />
+            <ui:Label name="resultSub" class="result-sub" />
+            <ui:Label name="resultCount" class="result-count" />
+            <ui:ScrollView name="resultList" class="result-list" />
+            <ui:VisualElement class="row result-buttons">
+                <ui:Label name="resultWait" class="result-wait grow" text="호스트가 다음 밤을 시작하길 기다리는 중…" />
+                <ui:Button name="resultLobby" text="로비로" />
+                <ui:Button name="resultNext" text="다음 밤 시작" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

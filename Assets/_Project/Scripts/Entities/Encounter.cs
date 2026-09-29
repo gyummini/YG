@@ -95,5 +95,7 @@ namespace NightOffice
         Vanish = 2,
         Resolved = 3,
         Cleared = 4,
+        /// <summary>흉내쟁이: the control room opened the office door to it.</summary>
+        Opened = 5,
     }
 }

@@ -51,6 +51,16 @@
     margin-right: var(--space-md);
 }
 
+.term-handled {
+    color: var(--color-text);
+    margin-right: var(--space-lg);
+}
+
+.term-tab.alert {
+    border-color: var(--color-danger);
+    color: rgb(255, 200, 190);
+}
+
 .term-status.alert {
     color: var(--color-danger);
 }
@@ -82,11 +92,14 @@
 
 .term-body {
     flex-grow: 1;
+    flex-basis: 0;
+    overflow: hidden;
     margin-top: var(--space-sm);
 }
 
 .term-page {
     flex-grow: 1;
+    flex-basis: 0;
     flex-direction: row;
 }
 
@@ -118,6 +131,7 @@
 .tag-section {
     color: var(--color-text-dim);
     font-size: var(--font-sm);
+    flex-shrink: 0;
     margin-top: var(--space-sm);
     border-bottom-width: 1px;
     border-color: var(--color-panel-line);
@@ -125,6 +139,7 @@
 
 .tag-group {
     margin-top: var(--space-xs);
+    flex-shrink: 0;
 }
 
 .tag-group-caption {
@@ -134,6 +149,7 @@
 .tag-row {
     flex-direction: row;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .tag-chip {
@@ -155,6 +171,7 @@
 
 .candidate {
     flex-direction: row;
+    flex-shrink: 0;
     align-items: center;
     padding: 4px;
     margin-bottom: 4px;
@@ -531,6 +548,84 @@
 .plan-legend {
     width: 250px;
     margin-left: var(--space-sm);
+}
+
+/* ---------------------------------------------------------------- 민원 */
+.complaint-panel {
+    flex-grow: 1;
+}
+
+.complaint-help {
+    width: 320px;
+}
+
+.complaint-help .dim-note {
+    margin-bottom: var(--space-sm);
+}
+
+.complaint-list {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.complaint-row {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom-width: 1px;
+    border-color: var(--color-panel-line);
+}
+
+.complaint-time {
+    width: 64px;
+    color: var(--color-text-dim);
+}
+
+.complaint-main {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.complaint-from {
+    color: var(--color-accent);
+    font-size: var(--font-sm);
+}
+
+.complaint-text {
+    white-space: normal;
+}
+
+.complaint-state {
+    width: 150px;
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+}
+
+.complaint-btn {
+    font-size: var(--font-sm);
+    padding: 4px 12px;
+}
+
+.complaint-row.new .complaint-text {
+    color: rgb(250, 240, 220);
+}
+
+.complaint-row.new .complaint-state {
+    color: var(--color-danger);
+}
+
+.complaint-row.dispatched .complaint-state {
+    color: var(--color-accent);
+}
+
+.complaint-row.handled .complaint-text {
+    color: var(--color-text-dim);
+}
+
+.complaint-row.handled .complaint-state {
+    color: var(--color-ok);
 }
 
 /* ---------------------------------------------------------------- 전원 꺼짐 (흉내쟁이) */

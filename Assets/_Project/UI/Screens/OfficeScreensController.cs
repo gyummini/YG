@@ -7,8 +7,8 @@ using L = NightOffice.BuildingLayout;
 namespace NightOffice
 {
     /// <summary>
-    /// 단말기 (매뉴얼 · 계기판 · 원격 조작 · 도면) and the shift fax. Opened from the office devices; while open the
-    /// player cannot move or look around (push-to-talk still works). Esc closes.
+    /// 단말기 (매뉴얼 · 계기판 · 원격 조작 · 도면 · 민원) and the shift fax. Opened from the office devices; while open
+    /// the player cannot move or look around (push-to-talk still works). Esc closes.
     /// </summary>
     public class OfficeScreensController : MonoBehaviour, IOfficeScreensTest
     {
@@ -21,6 +21,7 @@ namespace NightOffice
             Gauges,
             Remote,
             Plan,
+            Complaints,
         }
 
         bool m_Bound;
@@ -60,6 +61,12 @@ namespace NightOffice
         Label m_PlanNotes;
         readonly List<(int floor, Button button)> m_PlanFloorButtons = new List<(int, Button)>();
 
+        // complaints
+        Label m_Handled, m_ComplaintEmpty;
+        ScrollView m_ComplaintList;
+        int m_ComplaintStamp = -1;
+        readonly List<(byte id, Button dispatch, Button wait)> m_ComplaintButtons = new List<(byte, Button, Button)>();
+
         // fax
         Label m_FaxMeta, m_FaxCallSigns;
         VisualElement m_FaxRules, m_FaxCodes;
@@ -98,6 +105,10 @@ namespace NightOffice
             BindTab(Page.Gauges, "tabGauges", "pageGauges");
             BindTab(Page.Remote, "tabRemote", "pageRemote");
             BindTab(Page.Plan, "tabPlan", "pagePlan");
+            BindTab(Page.Complaints, "tabComplaints", "pageComplaints");
+            m_Handled = m_Term.Q<Label>("termHandled");
+            m_ComplaintList = m_Term.Q<ScrollView>("complaintList");
+            m_ComplaintEmpty = m_Term.Q<Label>("complaintEmpty");
 
             BindManual();
             BindGauges();
@@ -557,6 +568,90 @@ namespace NightOffice
             }
         }
 
+        // ================================================================ 민원
+        void RefreshComplaintBadge()
+        {
+            var board = ComplaintBoard.I;
+            bool live = board != null && board.IsSpawned;
+            int unanswered = live ? board.UnansweredCount : 0;
+            var tab = m_Tabs[Page.Complaints];
+            tab.text = unanswered > 0 ? $"민원 ({unanswered})" : "민원";
+            tab.EnableInClassList("alert", unanswered > 0);
+            var night = NightDirector.I;
+            int handled = night != null && night.IsSpawned ? night.HandledComplaints.Value : 0;
+            m_Handled.text = $"처리 민원 {handled} / {GameSettings.I.night.targetComplaints}";
+        }
+
+        static int Stamp(ComplaintBoard board)
+        {
+            int h = board.Items.Count * 31;
+            foreach (var c in board.Items) h = h * 7 + c.Id * 5 + (int)c.State;
+            return h;
+        }
+
+        void RefreshComplaints(bool powerOut)
+        {
+            var board = ComplaintBoard.I;
+            if (board == null || !board.IsSpawned) return;
+            int stamp = Stamp(board) * 2 + (powerOut ? 1 : 0);
+            if (stamp == m_ComplaintStamp) return;
+            m_ComplaintStamp = stamp;
+            m_ComplaintList.Clear();
+            m_ComplaintButtons.Clear();
+            UIRoot.Show(m_ComplaintEmpty, board.Items.Count == 0);
+            for (int i = board.Items.Count - 1; i >= 0; i--)
+            {
+                var c = board.Items[i];
+                var row = new VisualElement();
+                row.AddToClassList("complaint-row");
+                row.AddToClassList(c.State == ComplaintState.New ? "new" : c.State == ComplaintState.Dispatched ? "dispatched" : c.State == ComplaintState.Handled ? "handled" : "waiting");
+                var time = new Label(GameClock.Format(c.Minute));
+                time.AddToClassList("complaint-time");
+                var main = new VisualElement();
+                main.AddToClassList("complaint-main");
+                var from = new Label($"{c.Unit}호");
+                from.AddToClassList("complaint-from");
+                var text = new Label(ComplaintBoard.TextOf(c));
+                text.AddToClassList("complaint-text");
+                main.Add(from);
+                main.Add(text);
+                var state = new Label(StateText(c));
+                state.AddToClassList("complaint-state");
+                row.Add(time);
+                row.Add(main);
+                row.Add(state);
+                byte id = c.Id;
+                var dispatch = new Button(() => Reply(id, ComplaintState.Dispatched)) { text = "순찰 보냄" };
+                var wait = new Button(() => Reply(id, ComplaintState.Waiting)) { text = "기다려 주세요" };
+                dispatch.AddToClassList("complaint-btn");
+                wait.AddToClassList("complaint-btn");
+                bool canReply = !powerOut && (c.State == ComplaintState.New || c.State == ComplaintState.Waiting);
+                dispatch.SetEnabled(canReply);
+                wait.SetEnabled(canReply && c.State == ComplaintState.New);
+                row.Add(dispatch);
+                row.Add(wait);
+                m_ComplaintButtons.Add((id, dispatch, wait));
+                m_ComplaintList.Add(row);
+            }
+        }
+
+        static string StateText(ComplaintRecord c)
+        {
+            switch (c.State)
+            {
+                case ComplaintState.New: return "새 민원 · 답장 전";
+                case ComplaintState.Waiting: return "기다리는 중";
+                case ComplaintState.Dispatched: return c.Task == ComplaintTask.RideElevator ? $"순찰 보냄 · 엘리베이터 {c.Floor}층" : "순찰 보냄";
+                default: return $"처리됨 {GameClock.Format(c.HandledMinute)}";
+            }
+        }
+
+        void Reply(byte id, ComplaintState reply)
+        {
+            ComplaintBoard.I?.ReplyRpc(id, reply);
+            AudioService.I?.PlayUi(SfxId.TerminalClick);
+        }
+
         // ================================================================ 팩스
         void BindFax()
         {
@@ -608,6 +703,7 @@ namespace NightOffice
                 local?.SetFlag(PlayerNet.Flags.AtTerminal, true);
                 m_CardLogCount = -1;
                 m_RegistryStamp = uint.MaxValue;
+                m_ComplaintStamp = -1;
                 RefreshPlan();
             }
             else
@@ -676,8 +772,12 @@ namespace NightOffice
             m_Status.text = powerOut ? "상황실 전원 꺼짐" : "상황실 전원 정상";
             m_Status.EnableInClassList("alert", powerOut);
             RefreshRegistered();
+            RefreshComplaintBadge();
             switch (m_Page)
             {
+                case Page.Complaints:
+                    RefreshComplaints(powerOut);
+                    break;
                 case Page.Gauges:
                     RefreshGauges();
                     break;
@@ -733,8 +833,37 @@ namespace NightOffice
         public int TestCandidateCount => m_CandidateList != null ? m_CandidateList.childCount : -1;
         public string TestCardName => m_CardBody != null && !m_CardBody.ClassListContains("hidden") ? m_CardName.text : null;
 
-        /// <summary>0 매뉴얼, 1 계기판, 2 원격 조작, 3 도면.</summary>
-        public void TestShowPage(int page) => ShowPage((Page)Mathf.Clamp(page, 0, 3));
+        /// <summary>0 매뉴얼, 1 계기판, 2 원격 조작, 3 도면, 4 민원.</summary>
+        public void TestShowPage(int page) => ShowPage((Page)Mathf.Clamp(page, 0, 4));
+
+        public int TestComplaintRows
+        {
+            get
+            {
+                RefreshComplaints(LightingNet.I != null && LightingNet.I.OfficePowerOut.Value);
+                return m_ComplaintList != null ? m_ComplaintList.childCount : -1;
+            }
+        }
+
+        /// <summary>Press a reply button of the complaint with that id, as a click would (false if disabled/missing).</summary>
+        public bool TestReply(byte id, bool dispatch)
+        {
+            m_ComplaintStamp = -1;
+            RefreshComplaints(LightingNet.I != null && LightingNet.I.OfficePowerOut.Value);
+            foreach (var (cid, d, w) in m_ComplaintButtons)
+            {
+                if (cid != id) continue;
+                var b = dispatch ? d : w;
+                if (!b.enabledSelf) return false;
+                using (var e = NavigationSubmitEvent.GetPooled())
+                {
+                    e.target = b;
+                    b.SendEvent(e);
+                }
+                return true;
+            }
+            return false;
+        }
 
         public void TestPlanFloor(int floor)
         {

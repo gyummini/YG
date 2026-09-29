@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbde2f2a052e20a45ba5c638b4cab4c6, type: 3}
+  m_Name: Echo
+  m_EditorClassIdentifier: NightOffice::NightOffice.EntityDefinition
+  id: 8
+  displayName: "\uC6B8\uB9BC"
+  bundle: 4
+  category: 2
+  pictogram: e_echo
+  nature: "\u2014 (\uC815\uC0C1 \uC0C1\uD669: \uAC1C\uCCB4\uAC00 \uC544\uB2C8\uB2E4)"
+  clues:
+  - attr: 0
+    value: "\uB4A4\uC5D0\uC11C \uBC1C\uC18C\uB9AC\uAC00 \uB530\uB77C\uC628\uB2E4"
+    expensive: 0
+    how: 
+  - attr: 3
+    value: "\uBA48\uCD94\uBA74 \uD55C \uBC15\uC790 \uB2A6\uAC8C \uC7A6\uC544\uB4E6"
+    expensive: 0
+    how: "\uBA48\uCDB0 \uC11C\uC11C \uB4E4\uC5B4\uC57C \uD55C\uB2E4."
+  - attr: 12
+    value: "\uACC4\uB2E8\uC2E4\uC5D0\uC11C\uB9CC"
+    expensive: 0
+    how: 
+  - attr: 4
+    value: "\uB354 \uC5C6\uC74C (\uB0B4 \uAC83\uBFD0)"
+    expensive: 1
+    how: "\uC190\uC804\uB4F1\uC744 \uBC1C\uBC11 \uB4A4\uCABD \uBC14\uB2E5\uC5D0 \uBE44\uCDB0\uC57C \uD55C\uB2E4."
+  condition: 
+  common:
+    when: 
+    text: 
+    pictograms: []
+  branches:
+  - when: 
+    text: "\uBB34\uC2DC\uD558\uACE0 \uC9C4\uD589."
+    pictograms:
+    - a_ignore
+  hasWarning: 0
+  warning: "\uACBD\uACE0 \uC5C6\uC74C. \uC624\uD310\uD558\uBA74 \uC2DC\uAC04\uB9CC \uC783\uB294\uB2E4."
+  variants: []

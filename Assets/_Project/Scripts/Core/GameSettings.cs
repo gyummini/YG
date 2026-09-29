@@ -42,6 +42,8 @@ namespace NightOffice
             [Tooltip("현장이 관리사무소로 돌아오면 배치된 묶음을 정리")] public bool clearBundlesOnReturn = true;
             [Tooltip("층마다 공실 수")] public int vacantPerFloor = 2;
             [Tooltip("층마다 창고 수")] public int storagePerFloor = 1;
+            [Tooltip("민원 확인: 세대 문 앞에서 E를 누르고 있는 시간(초)")] public float complaintCheckHoldSec = 1.2f;
+            [Tooltip("민원 확인: 세대 문에서 이 거리(m) 안")] public float complaintCheckDistance = 2.6f;
         }
 
         [Serializable]
@@ -131,6 +133,7 @@ namespace NightOffice
         {
             [Header("등록 · 등장")]
             [Tooltip("묶음이 등록된 뒤 현장이 위층에 들어서면 이 범위(초) 뒤에 나타남")] public Vector2 manifestDelaySec = new Vector2(4f, 10f);
+            [Tooltip("발소리 묶음(D)은 계단실을 지나는 시간이 짧아서 더 빨리 시작(초)")] public Vector2 footstepManifestDelaySec = new Vector2(1.5f, 4f);
             [Tooltip("판정 샘플 간격(초)")] public float tickSec = 0.1f;
 
             [Header("키 큰 형체 (키다리 · 배웅꾼)")]
@@ -165,6 +168,39 @@ namespace NightOffice
 
             [Header("배전함")]
             [Tooltip("배전함 리셋에 E를 누르고 있는 시간(초)")] public float panelHoldSec = 2.5f;
+
+            [Header("엘리베이터 (빈 층 · 동승자)")]
+            [Tooltip("빈 층: 문 밖 복도가 밝을 때 문이 스스로 닫히기까지(초)")] public float emptyFloorCloseSec = 9f;
+            [Tooltip("빈 층: 어두울 때 상황실이 원격으로 닫아 주길 기다리는 한계(초)")] public float emptyFloorDarkPatience = 60f;
+            [Tooltip("동승자: 동승자 쪽으로 이 각도(도) 안을 보면 '돌아봄' (버튼판 쪽은 괜찮게)")] public float lookBackAngle = 45f;
+            [Tooltip("동승자: 문이 닫히고 판정을 시작하기까지 여유(초)")] public float passengerRuleGrace = 1.5f;
+            [Tooltip("동승자: 돌아본 채 이만큼(초)이면 실수")] public float lookBackTolerance = 0.3f;
+            [Tooltip("동승자: 거울 속 눈을 이만큼(초) 마주 보면 실수 (짧게 보는 건 괜찮다)")] public float mirrorGazeSec = 1.0f;
+            [Tooltip("동승자: 가장 가까운 층에서 문이 열린 뒤 걸어 나가야 하는 시간(초)")] public float walkOutSec = 7f;
+            [Tooltip("동승자 경고: 엘리베이터가 층 사이에 멈춰 있는 시간(초)")] public float passengerHaltSec = 4f;
+            [Tooltip("동승자: 2층에서 탔을 때 올라가는 쪽을 고를 확률")] public float passengerUpChance = 0.5f;
+
+            [Header("발소리 (뒷사람 · 울림)")]
+            [Tooltip("뒷사람이 따라붙는 거리(m)")] public float followDistance = 2.2f;
+            [Tooltip("처음 발소리가 들리기 시작하는 거리(m)")] public float followStartDistance = 8f;
+            [Tooltip("다가오는 속도(m/s, 현장이 걷는 동안)")] public float followCloseInSpeed = 1.2f;
+            [Tooltip("경고 뒤 거리(m) — 바로 뒤에 붙는다")] public float followWarnedDistance = 0.9f;
+            [Tooltip("따라붙은 뒤 대응을 시작할 여유(초)")] public float followerRuleGrace = 6f;
+            [Tooltip("무전을 누르고 있었다면 손을 떼야 하는 시간(초)")] public float txReleaseGrace = 1.5f;
+            [Tooltip("손을 뗀 뒤 제자리에서 버티면 발소리가 사라지는 시간(초)")] public float followerFadeSec = 8f;
+            [Tooltip("누르지 않은 채 이만큼(초) 멈춰 서면 실수 (멈춰서 들어 보는 건 괜찮다)")] public float followerStillTolerance = 3f;
+            [Tooltip("빈방에 들어가지 못하고 걷는 한계(초)")] public float followerPatience = 90f;
+            [Tooltip("울림: 현장 발소리 뒤 메아리까지(초)")] public float echoDelaySec = 0.16f;
+            [Tooltip("울림: 멈춘 뒤 한 박자 늦은 마지막 울림(초, 마지막 메아리 기준)")] public float echoTailSec = 0.45f;
+
+            [Header("흉내쟁이")]
+            [Tooltip("현장이 돌아올 때 흉내쟁이 노크가 먼저 올 확률")] public float mimicChance = 0.5f;
+            [Tooltip("돌아오기 시작한 뒤 노크까지(초)")] public Vector2 mimicDelaySec = new Vector2(4f, 12f);
+            [Tooltip("현장이 관리사무소 문에서 이 거리(m) 안이면 흉내쟁이는 오지 않음")] public float mimicMinFieldDistance = 12f;
+            [Tooltip("대답이 없으면 같은 노크를 한 번 더 하기까지(초)")] public float mimicRepeatSec = 8f;
+            [Tooltip("마지막 노크 뒤 문 앞에 머무는 시간(초)")] public float mimicLingerSec = 20f;
+            [Tooltip("진짜 현장이 문에서 이 거리(m)까지 오면 흉내쟁이는 물러남")] public float mimicRetreatDistance = 6f;
+            [Tooltip("흉내쟁이에게 문을 열면 상황실 전원이 꺼지는 시간(초)")] public float mimicPowerOutSec = 60f;
         }
 
         [Serializable]
