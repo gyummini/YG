@@ -176,11 +176,16 @@ namespace NightOffice
             yield return new WaitForSeconds(1.5f);
             m_EntityEvents.Clear();
             int logBefore = dir.Log.Count;
+            bool wasIn = field.ZoneType == ZoneType.Office;
             field.TeleportRpc(new Vector3(2.5f, 0f, 6.0f), 90f);
-            yield return new WaitForSeconds(1.2f);
+            float tr = Time.time;
+            while (Time.time - tr < 4f && dir.Current.Value == BundleId.None) yield return null;
+            float took = Time.time - tr;
+            yield return new WaitForSeconds(0.3f);
             var armed = dir.Armed;
             bool registered = dir.Current.Value != BundleId.None && dir.Log.Count == logBefore + 1;
-            Check("현장이 문을 나서면 묶음 1개 등록", registered && (armed == EntityId.TallOne || armed == EntityId.Escort || armed == EntityId.LightEater || armed == EntityId.Short), $"{dir.Current.Value} armed={armed}");
+            Check("현장이 문을 나서면 묶음 1개 등록", registered && armed != EntityId.None && armed != EntityId.Mimic,
+                $"{dir.Current.Value} armed={armed} {took:0.00}s 사무실 안에서 출발={wasIn}");
             string shown = ui.TestRegisteredText;
             Check("단말기에는 첫인상만 표시 (어느 개체인지는 숨김)", shown != null && !shown.Contains("키다리") && !shown.Contains("배웅꾼") && !shown.Contains("불먹는") && !shown.Contains("누전"), shown ?? "-");
             field.TeleportRpc(OfficeB, 90f);

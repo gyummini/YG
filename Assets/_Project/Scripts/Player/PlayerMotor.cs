@@ -33,9 +33,12 @@ namespace NightOffice
         public void Teleport(Vector3 position, float yaw)
         {
             if (Cc != null) Cc.enabled = false;
-            transform.position = position;
             m_Yaw = yaw;
-            transform.rotation = Quaternion.Euler(0f, m_Yaw, 0f);
+            var rotation = Quaternion.Euler(0f, m_Yaw, 0f);
+            // as a teleport, so the other side jumps too instead of sliding across the building (and through the office)
+            var nt = GetComponent<Unity.Netcode.Components.NetworkTransform>();
+            if (nt != null && nt.IsSpawned && nt.CanCommitToTransform) nt.Teleport(position, rotation, transform.localScale);
+            else transform.SetPositionAndRotation(position, rotation);
             m_VerticalVel = 0f;
             m_LastPos = position;
             if (Cc != null && net.IsOwner) Cc.enabled = true;
