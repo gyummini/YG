@@ -90,3 +90,9 @@ __pycache__/
 # Local test artifacts (autotest reports, screenshots) and agent helper scripts
 /TestResults/
 /AgentScripts/
+
+# GPT texture maps are build outputs of Tools/gen_art_gpt.py (originals archived in Docs/art/gpt_source)
+/Assets/_Project/Textures/ArtTest/gpt/
+/Assets/_Project/Textures/ArtTest/gpt.meta
+/Assets/_Project/Textures/ArtTest/gpt_lofi/
+/Assets/_Project/Textures/ArtTest/gpt_lofi.meta

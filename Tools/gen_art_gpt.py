@@ -5,11 +5,19 @@ GPT (Codex image generation) side of the art-direction test.
     python Tools/gen_art_gpt.py tiles [name ...]     material tiles -> %TEMP%/nocx/art/tile_<name>.png
     python Tools/gen_art_gpt.py build                tiles -> Assets/_Project/Textures/ArtTest/gpt/ (same maps and layout
                                                      as Tools/gen_art_textures.py: delit, color-matched, made seamless)
+    python Tools/gen_art_gpt.py lofi-tiles [name ...] grimy tiles for the lo-fi look -> %TEMP%/nocx/art/tile_lofi_<name>.png
+    python Tools/gen_art_gpt.py lofi-build           -> Assets/_Project/Textures/ArtTest/gpt_lofi/ (look F)
+
+At lo-fi texel density (~40 texels per meter) fine detail disappears; what reads is grime at a 20-50 cm scale. So the
+lo-fi tiles ask for big stains and drips, and their build keeps that large-scale variation (no delighting) and only
+matches brightness, not colour.
     python Tools/gen_art_gpt.py status
 
 Concepts attach the in-engine capture of the same shot and look (TestResults/art/<shot>_<look>.png, from
 NightOffice/Art/Capture Look Comparison) so the paint-over keeps our camera and layout; the gap between the two is the
 to-do list for that direction. Tiles become looks D (= A), E (= C) and F (= B) in the capture tool.
+The built maps (Textures/ArtTest/gpt, gpt_lofi) are not committed; the GPT originals are archived as 1024 px JPEGs in
+Docs/art/gpt_source, and build / lofi-build read them from there when %TEMP%/nocx/art has no copy.
 Needs the Codex CLI (CODEX env var, default %TEMP%/nocx/codex.exe with codex-code-mode-host.exe beside it).
 """
 import os
@@ -30,6 +38,15 @@ ART = os.path.join(ROOT, "TestResults", "art")
 WORK = os.environ.get("ART_GPT_WORK", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "art"))
 GPT_OUT = os.environ.get("ART_GPT_OUT", os.path.join(proc.OUT, "gpt"))
 CODEX = os.environ.get("CODEX", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "codex.exe"))
+SOURCE = os.path.join(ROOT, "Docs", "art", "gpt_source")
+
+
+def tile_path(name):
+    """The generated tile in the work folder, else its archived copy (None if neither exists)."""
+    for p in (os.path.join(WORK, f"tile_{name}.png"), os.path.join(SOURCE, f"tile_{name}.jpg")):
+        if os.path.exists(p):
+            return p
+    return None
 
 GEN = ("Use your image generation tool to create ONE image and save it as a PNG file named {file} in the current "
        "working directory (overwrite if it exists). Do not draw it with code; generate it as an image.\n")
@@ -108,6 +125,28 @@ def tile_prompt(name):
     return GEN.format(file=f"tile_{name}.png") + TILE_STYLE + "\nSubject: " + TILES[name] + "\nReply with just the saved file path."
 
 
+LOFI_STYLE = ("Seamless tileable texture, square, viewed straight on (orthographic), flat even lighting, filling the whole "
+              "image edge to edge; no objects, no text, no borders. It will be shown at very low resolution in a "
+              "PlayStation 1 style horror game, so the grime must be big and readable: large stains, drips and patches "
+              "20 to 50 cm across, strong but believable.")
+LOFI_TILES = {
+    "wall": "old cream painted concrete wall of a 1990s Korean apartment corridor, never repainted: large yellow-brown "
+            "water stains, rusty drip streaks running down, grey dirty patches, a few patches of peeling paint; about "
+            "1.6 m x 1.6 m of wall.",
+    "band": "dark green-grey enamel paint of the lower wall band in a Korean apartment corridor: scuffed and chipped "
+            "with lighter paint showing, dirt splashes and dark streaks; about 1.6 m x 1.6 m.",
+    "ceiling": "painted concrete ceiling, off-white, with big yellowish water stain rings and a few dark mould spots; "
+               "about 2 m x 2 m.",
+    "door": "dark brown painted steel of an old apartment front door: rust spots, long scratches, dull dirt, worn "
+            "paint; about 1 m x 1 m.",
+}
+
+
+def lofi_tile_prompt(name):
+    return (GEN.format(file=f"tile_lofi_{name}.png") + LOFI_STYLE + "\nSubject: " + LOFI_TILES[name]
+            + "\nReply with just the saved file path.")
+
+
 # ------------------------------------------------------------------ codex
 def run_codex(prompt, out_file, attach=None):
     cmd = [CODEX, "exec", "--skip-git-repo-check", "--ephemeral"]
@@ -159,6 +198,14 @@ def gen_tile(name):
     return name, "ok" if ok else "FAILED " + tail, sec
 
 
+def gen_lofi_tile(name):
+    out = os.path.join(WORK, f"tile_lofi_{name}.png")
+    if os.path.exists(out):
+        return name, "exists", 0.0
+    ok, tail, sec = run_codex(lofi_tile_prompt(name), out)
+    return name, "ok" if ok else "FAILED " + tail, sec
+
+
 def generate(fn, keys):
     os.makedirs(WORK, exist_ok=True)
     with ThreadPoolExecutor(max_workers=4) as ex:
@@ -197,16 +244,20 @@ def make_seamless(a, feather=0.2):
             + (1 - fx) * (1 - fy) * np.roll(a, (hy, hx), (0, 1)))
 
 
-def load_tile(name, target_mean, delight=0.8):
+def load_tile(name, target_mean, delight=0.8, keep_colour=False):
     """RGB float tile: seamless, large-scale lighting divided out, colour matched to the procedural palette so the
-    comparison is about surface detail rather than paint colour."""
-    a = np.asarray(Image.open(os.path.join(WORK, f"tile_{name}.png")).convert("RGB")).astype(float) / 255.0
+    comparison is about surface detail rather than paint colour (keep_colour: match brightness only)."""
+    a = np.asarray(Image.open(tile_path(name)).convert("RGB")).astype(float) / 255.0
     before = seam_ratio(a)
     if before > 1.5:
         a = make_seamless(a)
-    low = blur(a, a.shape[0] / 8)
-    a = a * (low.mean((0, 1)) / np.maximum(low, 1e-3)) ** delight
-    a = a * (np.asarray(target_mean) / a.mean((0, 1)))
+    if delight > 0:
+        low = blur(a, a.shape[0] / 8)
+        a = a * (low.mean((0, 1)) / np.maximum(low, 1e-3)) ** delight
+    if keep_colour:
+        a = a * (np.mean(target_mean) / a.mean())
+    else:
+        a = a * (np.asarray(target_mean) / a.mean((0, 1)))
     print(f"  {name:18s} seam {before:5.2f} -> {seam_ratio(a):4.2f}  mean {np.round(a.mean((0, 1)), 3)}")
     return np.clip(a, 0, 1)
 
@@ -228,7 +279,7 @@ def relief(rgb, sigma=6.0):
 
 def build():
     os.makedirs(GPT_OUT, exist_ok=True)
-    have = lambda n: os.path.exists(os.path.join(WORK, f"tile_{n}.png"))  # noqa: E731
+    have = lambda n: tile_path(n) is not None  # noqa: E731
     if have("wall_paint") and have("band_paint"):
         paint = tiled(load_tile("wall_paint", proc.WALL_PAINT), 2048, 2)
         band = tiled(load_tile("band_paint", proc.WALL_BAND), 2048, 2)
@@ -256,6 +307,23 @@ def build():
     print("gpt maps ->", GPT_OUT, sorted(os.listdir(GPT_OUT)))
 
 
+def lofi_build():
+    """Grimy tiles for look F: large stains kept (no delighting), brightness matched, own colours kept."""
+    out = os.path.join(proc.OUT, "gpt_lofi")
+    have = lambda n: tile_path("lofi_" + n) is not None  # noqa: E731
+    if have("wall") and have("band"):
+        paint = tiled(load_tile("lofi_wall", proc.WALL_PAINT, 0, True), 2048, 2)
+        band = tiled(load_tile("lofi_band", proc.WALL_BAND, 0, True), 2048, 2)
+        _, is_band, _, _ = proc.wall_layout(2048)
+        proc.wall(paint, band, relief(proc.lerp(paint, band, is_band)) * 0.8, out)
+    if have("ceiling"):
+        proc.save_rgb("ceiling_albedo", tiled(load_tile("lofi_ceiling", (0.78, 0.77, 0.74), 0, True), 2048, 2), out)
+    if have("door"):
+        t = tiled(load_tile("lofi_door", proc.DOOR_PAINT, 0, True), 589 * 3, 3)
+        proc.door(t[:proc.DOOR_H, :proc.DOOR_W], out)
+    print("lofi maps ->", out, sorted(os.listdir(out)))
+
+
 def status():
     for k in concept_keys():
         print(f"{k:22s} {'done' if os.path.exists(os.path.join(ART, k + '.png')) else '-'}")
@@ -272,5 +340,9 @@ if __name__ == "__main__":
         generate(gen_tile, args or list(TILES))
     elif cmd == "build":
         build()
+    elif cmd == "lofi-tiles":
+        generate(gen_lofi_tile, args or list(LOFI_TILES))
+    elif cmd == "lofi-build":
+        lofi_build()
     else:
         status()

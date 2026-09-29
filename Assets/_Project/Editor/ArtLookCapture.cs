@@ -184,10 +184,19 @@ namespace NightOffice.EditorTools
         /// <summary>The GPT-textured variant of a look (D → A, E → C, F → B); the others map to themselves.</summary>
         static char BaseLook(char look) => look == 'D' ? 'A' : look == 'E' ? 'C' : look == 'F' ? 'B' : look;
 
+        static string s_GptDir = "gpt";
+
+        /// <summary>GPT looks take their texture from s_GptDir (F: the grimy lo-fi set), then the GPT set, then the
+        /// procedural one.</summary>
         static Texture2D Tex(string name)
         {
-            var gpt = s_Gpt ? AssetDatabase.LoadAssetAtPath<Texture2D>($"{TexDir}/gpt/{name}.png") : null;
-            return gpt != null ? gpt : AssetDatabase.LoadAssetAtPath<Texture2D>($"{TexDir}/{name}.png");
+            if (s_Gpt)
+                foreach (var dir in new[] { s_GptDir, "gpt" })
+                {
+                    var t = AssetDatabase.LoadAssetAtPath<Texture2D>($"{TexDir}/{dir}/{name}.png");
+                    if (t != null) return t;
+                }
+            return AssetDatabase.LoadAssetAtPath<Texture2D>($"{TexDir}/{name}.png");
         }
 
         static Texture2D SignTex(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>($"{TexDir}/signs/{name}.png");
@@ -262,6 +271,7 @@ namespace NightOffice.EditorTools
         static void Dress(char look)
         {
             s_Gpt = look != BaseLook(look);
+            s_GptDir = look == 'F' ? "gpt_lofi" : "gpt";
             look = BaseLook(look);
             var spec = Spec(look);
             s_RetroLook = spec.Retro;

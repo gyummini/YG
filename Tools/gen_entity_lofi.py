@@ -7,7 +7,8 @@ the painting becomes a PS1-style atlas.
     python Tools/gen_entity_lofi.py sheet    lo-fi turnaround renders -> Docs/art/entity_tallfigure_lofi.png
 
 The sheet is front | left side | back in thirds, exactly the model's UV projections, so the painted views land on
-the faces they were painted for. Background texels are filled from the nearby figure colours before the downsample so
+the faces they were painted for. The GPT painting is archived in Docs/art/gpt_source/entity_tallfigure_paint.jpg and
+`build` falls back to it (after the Blender script has rendered the reference views again). Background texels are filled from the nearby figure colours before the downsample so
 edges do not pick up the white.
 """
 import os
@@ -94,7 +95,12 @@ def fill_background(rgb, mask, rounds=24):
 
 
 def build():
-    paint = Image.open(os.path.join(WORK, "paint.png")).convert("RGB").resize((1024, 1024), Image.LANCZOS)
+    src = os.path.join(WORK, "paint.png")
+    if not os.path.exists(src):
+        src = os.path.join(ROOT, "Docs", "art", "gpt_source", "entity_tallfigure_paint.jpg")
+    if not os.path.exists(sheet_path()):
+        make_sheet()
+    paint = Image.open(src).convert("RGB").resize((1024, 1024), Image.LANCZOS)
     rgb = np.asarray(paint).astype(np.float32)
     # unknown = outside the model's silhouette, or background the painter left inside it (its outline runs a bit thin)
     paper = (rgb.min(-1) > 236) & (rgb.max(-1) - rgb.min(-1) < 12)
