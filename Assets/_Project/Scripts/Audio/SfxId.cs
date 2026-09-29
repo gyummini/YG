@@ -69,6 +69,7 @@ namespace NightOffice
         AmbRoomTone = 92,
         AmbSubstation = 93,
         AmbStairAir = 94,
+        AmbOutdoor = 95, // open corridor: night air, distant traffic, crickets
 
         // Voice test
         TestVoice = 100,

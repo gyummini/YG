@@ -140,6 +140,7 @@ namespace NightOffice.EditorTools
             new Spec(SfxId.AmbRoomTone, "amb_room", 0.5f, 2f, 25f, SfxCategory.Ambience, 0f),
             new Spec(SfxId.AmbSubstation, "amb_substation", 0.5f, 1f, 9f, SfxCategory.Ambience, 0f),
             new Spec(SfxId.AmbStairAir, "amb_stair", 0.6f, 2f, 25f, SfxCategory.Ambience, 0f),
+            new Spec(SfxId.AmbOutdoor, "amb_outdoor", 0.55f, 3f, 28f, SfxCategory.Ambience, 0f),
             new Spec(SfxId.TestVoice, "test_voice", 1f, 1.2f, 16f, SfxCategory.Voice, 0f),
             new Spec(SfxId.UiClick, "ui_click", 0.5f, 1f, 5f, SfxCategory.Ui, 0f),
             new Spec(SfxId.ComplaintDone, "complaint_done", 0.5f, 1f, 5f, SfxCategory.Ui, 0f),
@@ -209,6 +210,18 @@ namespace NightOffice.EditorTools
             MakeEmissive(lit, "Screen", new Color(0.02f, 0.05f, 0.03f), new Color(0.15f, 0.6f, 0.3f));
             MakeEmissive(lit, "LedGreen", new Color(0.1f, 0.4f, 0.15f), new Color(0.2f, 1.2f, 0.3f));
             MakeEmissive(lit, "LedRed", new Color(0.4f, 0.08f, 0.05f), new Color(1.4f, 0.15f, 0.1f));
+            // open-air corridor and what lies beyond the railing
+            MakeLit(lit, "Parapet", new Color(0.5f, 0.5f, 0.47f), 0.06f);
+            MakeLit(lit, "Railing", new Color(0.16f, 0.17f, 0.18f), 0.45f, 0.7f);
+            MakeLit(lit, "Hydrant", new Color(0.55f, 0.07f, 0.05f), 0.4f);
+            MakeLit(lit, "WindowDark", new Color(0.03f, 0.04f, 0.05f), 0.85f);
+            MakeLit(lit, "Ground", new Color(0.09f, 0.09f, 0.1f), 0.2f);
+            MakeLit(lit, "Facade", new Color(0.12f, 0.12f, 0.13f), 0.05f);
+            MakeLit(lit, "Car", new Color(0.07f, 0.075f, 0.085f), 0.6f, 0.3f);
+            MakeEmissive(lit, "WindowLit", new Color(0.3f, 0.22f, 0.12f), new Color(2.6f, 1.8f, 0.9f));
+            MakeEmissive(lit, "WindowTV", new Color(0.1f, 0.14f, 0.2f), new Color(0.7f, 1.1f, 1.9f));
+            MakeEmissive(lit, "LampHead", new Color(0.4f, 0.3f, 0.15f), new Color(3.2f, 2.1f, 0.9f));
+            MakeEmissive(lit, "ExitSign", new Color(0.08f, 0.35f, 0.15f), new Color(0.35f, 1.6f, 0.6f));
             var mirrorShader = Shader.Find("NightOffice/MirrorScreenSpace");
             if (mirrorShader != null) MakeMat(mirrorShader, "Mirror", m => m.SetColor("_Tint", new Color(0.82f, 0.86f, 0.9f, 1f)));
             if (unlit != null) MakeMat(unlit, "Black", m => m.SetColor("_BaseColor", Color.black));

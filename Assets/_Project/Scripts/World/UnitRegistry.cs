@@ -66,10 +66,11 @@ namespace NightOffice
             unit = default;
             float best = float.MaxValue;
             bool found = false;
+            float fromPos = BuildingLayout.PathPos(from);
             foreach (var u in BuildingLayout.UnitsOnFloor(floor))
             {
                 if (!IsEmptyRoom(u.Number)) continue;
-                float d = Mathf.Abs(u.DoorX - from.x) + Mathf.Abs(BuildingLayout.CorridorCenterZ - from.z) * 0.5f;
+                float d = Mathf.Abs(u.PathPos - fromPos);
                 if (d < best)
                 {
                     best = d;

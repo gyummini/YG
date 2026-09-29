@@ -21,10 +21,11 @@ namespace NightOffice.EditorTools
         const float T = BuildingLayout.Wall;
         const float H = BuildingLayout.ClearHeight;
 
-        static Transform s_Geo, s_Zones, s_Doors, s_Lights, s_Props, s_Labels, s_Ambience, s_Net;
+        static Transform s_Geo, s_Zones, s_Doors, s_Lights, s_Props, s_Labels, s_Ambience, s_Net, s_Exterior;
         static readonly List<Zone> s_ZoneList = new List<Zone>();
         static readonly List<ZonePortal> s_Portals = new List<ZonePortal>();
         static readonly Dictionary<string, Zone> s_ZoneByKey = new Dictionary<string, Zone>();
+        static readonly Dictionary<string, Door> s_DoorByKey = new Dictionary<string, Door>();
         static int s_FixtureId;
         static Font s_Font;
 
@@ -51,6 +52,7 @@ namespace NightOffice.EditorTools
             s_ZoneList.Clear();
             s_Portals.Clear();
             s_ZoneByKey.Clear();
+            s_DoorByKey.Clear();
             s_FixtureId = 0;
             s_TextMat = null;
             s_Font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -65,20 +67,24 @@ namespace NightOffice.EditorTools
             s_Labels = Root("Labels");
             s_Ambience = Root("Ambience");
             s_Net = Root("Net");
+            s_Exterior = Root("Exterior");
 
             BuildZones();
             BuildShell();
             BuildOffice();
-            BuildLobby();
-            BuildStair();
+            BuildGroundFloor();
+            foreach (var s in BuildingLayout.Stairs) BuildStairCore(s);
             for (int f = 2; f <= BuildingLayout.MaxFloor; f++) BuildUpperFloor(f);
+            BuildDoors();
             var elevator = BuildElevator();
             BuildLights();
             BuildAmbience();
+            BuildExterior();
             BuildSystems(elevator);
             BuildExtras();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
+            BuildNavMesh(elevator);
             FixNetworkObjectIds();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -87,6 +93,8 @@ namespace NightOffice.EditorTools
             scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
             EditorBuildSettings.scenes = scenes.ToArray();
             Debug.Log($"[NightOffice] scene built: zones={s_ZoneList.Count} portals={s_Portals.Count} fixtures={s_FixtureId} doors={Object.FindObjectsByType<Door>(FindObjectsInactive.Include).Length}");
+            if (s_FixtureId > FixtureMask.Capacity) Debug.LogError($"[NightOffice] {s_FixtureId} fixtures exceed the {FixtureMask.Capacity}-bit dead mask");
+            ReportWalkTimes();
         }
 
         /// <summary>Extension point for later stages (entities, terminal...).</summary>
@@ -106,6 +114,13 @@ namespace NightOffice.EditorTools
         }
 
         static Transform Root(string name) => new GameObject(name).transform;
+
+        static Transform Group(Transform parent, string name)
+        {
+            var t = new GameObject(name).transform;
+            t.SetParent(parent, false);
+            return t;
+        }
 
         // ================================================================ geometry helpers
         public static GameObject Box(string name, Transform parent, Vector3 center, Vector3 size, string mat, bool collider = true, int layer = 0)
@@ -182,6 +197,14 @@ namespace NightOffice.EditorTools
             return tm;
         }
 
+        /// <summary>Label on a wall face: <paramref name="facing"/> is the direction the text is read from (toward the viewer).</summary>
+        public static TextMesh WallLabel(string text, Vector3 surfacePoint, Vector3 facing, float size = 0.045f, Color? color = null)
+        {
+            // TextMesh is readable when looking along its +z, so it must face away from the viewer.
+            float yaw = Mathf.Atan2(-facing.x, -facing.z) * Mathf.Rad2Deg;
+            return Label(text, surfacePoint + facing * 0.012f, yaw, size, color);
+        }
+
         static Material s_TextMat;
 
         /// <summary>Depth-tested text material (asset) for labels in edit mode; WorldLabel swaps fonts at runtime.</summary>
@@ -201,19 +224,23 @@ namespace NightOffice.EditorTools
         }
 
         // ================================================================ zones
-        static Zone MakeZone(string key, string label, ZoneType type, int floor, params Bounds[] boxes)
+        static void BuildZones()
         {
-            var go = new GameObject("Zone_" + key);
-            go.transform.SetParent(s_Zones, false);
-            var z = go.AddComponent<Zone>();
-            z.zoneId = s_ZoneList.Count;
-            z.type = type;
-            z.floor = floor;
-            z.label = label;
-            z.boxes = boxes;
-            s_ZoneList.Add(z);
-            s_ZoneByKey[key] = z;
-            return z;
+            foreach (var spec in BuildingLayout.ZoneSpecs())
+            {
+                var go = new GameObject("Zone_" + spec.Key);
+                go.transform.SetParent(s_Zones, false);
+                var z = go.AddComponent<Zone>();
+                z.zoneId = s_ZoneList.Count;
+                z.key = spec.Key;
+                z.type = spec.Type;
+                z.floor = spec.Floor;
+                z.section = spec.Section;
+                z.label = spec.Label;
+                z.boxes = spec.Boxes;
+                s_ZoneList.Add(z);
+                s_ZoneByKey[spec.Key] = z;
+            }
         }
 
         static Bounds MM(Vector3 min, Vector3 max)
@@ -223,28 +250,9 @@ namespace NightOffice.EditorTools
             return b;
         }
 
-        public static Zone ZoneOf(string key) => s_ZoneByKey.TryGetValue(key, out var z) ? z : null;
+        public static Zone ZoneOf(string key) => key != null && s_ZoneByKey.TryGetValue(key, out var z) ? z : null;
 
-        static void BuildZones()
-        {
-            float y2 = BuildingLayout.FloorY(2);
-            var o = BuildingLayout.Office;
-            MakeZone("office", "관리사무소", ZoneType.Office, 1, MM(new Vector3(o.xMin, 0f, o.yMin), new Vector3(o.xMax, y2 - 0.2f, o.yMax)));
-            var s = BuildingLayout.Substation;
-            MakeZone("substation", "변전실", ZoneType.Utility, 1, MM(new Vector3(s.xMin, 0f, s.yMin), new Vector3(s.xMax, y2 - 0.2f, s.yMax)));
-            var l = BuildingLayout.Lobby;
-            MakeZone("lobby", "1층 로비", ZoneType.Lobby, 1, MM(new Vector3(l.xMin, 0f, l.yMin), new Vector3(l.xMax, y2 - 0.2f, l.yMax)));
-            var st = BuildingLayout.Stair;
-            MakeZone("stair", "계단실", ZoneType.Stair, 0, MM(new Vector3(st.xMin, -0.5f, st.yMin), new Vector3(st.xMax, BuildingLayout.FloorY(5), st.yMax)));
-            for (int f = 2; f <= BuildingLayout.MaxFloor; f++)
-            {
-                float y = BuildingLayout.FloorY(f);
-                var c = BuildingLayout.Corridor;
-                MakeZone("corr" + f, f + "층 복도", ZoneType.Corridor, f, MM(new Vector3(c.xMin, y, c.yMin), new Vector3(c.xMax, y + H, c.yMax)));
-                foreach (var u in BuildingLayout.UnitsOnFloor(f))
-                    MakeZone("unit" + u.Number, u.Number + "호", ZoneType.Room, f, MM(new Vector3(u.Room.xMin, y, u.Room.yMin), new Vector3(u.Room.xMax, y + H, u.Room.yMax)));
-            }
-        }
+        public static Door DoorOf(string key) => key != null && s_DoorByKey.TryGetValue(key, out var d) ? d : null;
 
         static void Portal(Zone a, Zone b, MonoBehaviour gate, string name)
         {
@@ -259,34 +267,47 @@ namespace NightOffice.EditorTools
         }
 
         // ================================================================ doors
-        /// <summary>Door at an opening. yaw: the frame's forward points to side A (outside).</summary>
-        public static Door MakeDoor(string label, DoorKind kind, Vector3 pos, float yaw, float width, Zone sideA, Zone sideB, int floor, int unitNumber = 0)
+        /// <summary>Every door of the building (walls with their openings are built by the floor builders).</summary>
+        static void BuildDoors()
         {
-            var root = new GameObject("Door_" + label.Replace(' ', '_'));
+            foreach (var spec in BuildingLayout.DoorSpecs())
+                s_DoorByKey[spec.Key] = MakeDoor(spec);
+        }
+
+        /// <summary>Door at an opening. The frame's forward points to side A (outside).</summary>
+        static Door MakeDoor(BuildingLayout.DoorSpec spec)
+        {
+            var kind = spec.Kind;
+            float width = spec.Width;
+            var root = new GameObject("Door_" + spec.Key);
             root.transform.SetParent(s_Doors, false);
-            root.transform.position = pos;
-            root.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            root.transform.position = spec.Pos;
+            root.transform.rotation = Quaternion.Euler(0f, spec.Yaw, 0f);
             root.AddComponent<NetworkObject>();
             var door = root.AddComponent<Door>();
             door.kind = kind;
-            door.label = label;
-            door.floor = floor;
-            door.unitNumber = unitNumber;
-            door.sideA = sideA;
-            door.sideB = sideB;
+            door.key = spec.Key;
+            door.label = spec.Label;
+            door.floor = spec.Floor;
+            door.unitNumber = spec.Unit;
+            door.sideA = ZoneOf(spec.SideA);
+            door.sideB = ZoneOf(spec.SideB);
             door.frame = root.transform;
-            door.openAngle = 95f;
+            // the leaf always swings into side B; the hinge jamb decides which wall it rests against
+            float hs = spec.HingeRight ? -1f : 1f;
+            door.openAngle = 95f * hs;
+            door.holdOpen = spec.HoldOpen;
 
             var hinge = new GameObject("Hinge").transform;
             hinge.SetParent(root.transform, false);
-            hinge.localPosition = new Vector3(-width * 0.5f, 0f, 0f);
+            hinge.localPosition = new Vector3(-width * 0.5f * hs, 0f, 0f);
             door.hinge = hinge;
 
             string mat = kind == DoorKind.Fire ? "FireDoor" : kind == DoorKind.Unit ? "UnitDoor" : kind == DoorKind.Entrance ? "Glass" : "Door";
             var leaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
             leaf.name = "Leaf";
             leaf.transform.SetParent(hinge, false);
-            leaf.transform.localPosition = new Vector3(width * 0.5f, 1.04f, 0f);
+            leaf.transform.localPosition = new Vector3(width * 0.5f * hs, 1.04f, 0f);
             leaf.transform.localScale = new Vector3(width - 0.03f, 2.06f, 0.05f);
             leaf.GetComponent<Renderer>().sharedMaterial = AssetFactory.Mat(mat);
             leaf.layer = LayerMask.NameToLayer("Door");
@@ -298,27 +319,26 @@ namespace NightOffice.EditorTools
             handle.name = "Handle";
             Object.DestroyImmediate(handle.GetComponent<Collider>());
             handle.transform.SetParent(leaf.transform, false);
-            handle.transform.localPosition = new Vector3(0.4f, -0.02f, 0f);
+            handle.transform.localPosition = new Vector3(0.4f * hs, -0.02f, 0f);
             handle.transform.localScale = new Vector3(0.1f, 0.02f, 2.6f);
             handle.GetComponent<Renderer>().sharedMaterial = AssetFactory.Mat("Metal");
 
             if (kind == DoorKind.Fire || kind == DoorKind.Unit || kind == DoorKind.Office)
             {
-                // card reader on side A (and side B for fire doors)
-                ReaderBox(root.transform, width, 1f, kind == DoorKind.Office ? door : null);
-                if (kind == DoorKind.Fire) ReaderBox(root.transform, width, -1f, null);
+                // card reader on the latch side, on side A (and side B for fire doors)
+                ReaderBox(root.transform, width, 1f, hs, kind == DoorKind.Office ? door : null);
+                if (kind == DoorKind.Fire) ReaderBox(root.transform, width, -1f, hs, null);
             }
-
-            Portal(sideA, sideB, door, label);
+            Portal(door.sideA, door.sideB, door, spec.Key);
             return door;
         }
 
-        static void ReaderBox(Transform frame, float width, float side, Door officeDoor)
+        static void ReaderBox(Transform frame, float width, float side, float latchSide, Door officeDoor)
         {
             var r = GameObject.CreatePrimitive(PrimitiveType.Cube);
             r.name = side > 0 ? "ReaderA" : "ReaderB";
             r.transform.SetParent(frame, false);
-            r.transform.localPosition = new Vector3(width * 0.5f + 0.22f, 1.25f, side * 0.13f);
+            r.transform.localPosition = new Vector3((width * 0.5f + 0.22f) * latchSide, 1.25f, side * 0.13f);
             r.transform.localScale = new Vector3(0.09f, 0.14f, 0.03f);
             r.GetComponent<Renderer>().sharedMaterial = AssetFactory.Mat("Metal");
             var led = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -341,7 +361,7 @@ namespace NightOffice.EditorTools
         }
 
         // ================================================================ lights
-        static LightFixture Fixture(Vector3 pos, int circuit, Transform parent = null, float intensity = 2.2f, float range = 7.5f, bool alongZ = false)
+        static LightFixture Fixture(Vector3 pos, int circuit, int floor, int section, Transform parent = null, float intensity = 2.2f, float range = 7.5f, bool alongZ = false)
         {
             var root = new GameObject("Fixture_" + s_FixtureId);
             root.transform.SetParent(parent != null ? parent : s_Lights, false);
@@ -366,6 +386,8 @@ namespace NightOffice.EditorTools
             var fx = root.AddComponent<LightFixture>();
             fx.fixtureId = s_FixtureId++;
             fx.circuit = circuit;
+            fx.floor = floor;
+            fx.section = section;
             fx.lamp = l;
             fx.tube = r;
             fx.onMaterial = AssetFactory.Mat("TubeOn");
@@ -452,10 +474,10 @@ namespace NightOffice.EditorTools
             s_UiRoot = uiRoot;
             uiGo.AddComponent<MainScreens>();
 
-            // menu camera (office view)
+            // menu camera (office view from the back corner toward the door)
             var camGo = new GameObject("MenuCamera");
-            camGo.transform.position = new Vector3(-6.3f, 1.75f, 9.9f);
-            camGo.transform.LookAt(new Vector3(0f, 1.0f, 6.6f));
+            camGo.transform.position = new Vector3(-6.4f, 1.75f, 7.5f);
+            camGo.transform.LookAt(new Vector3(0f, 1.0f, 5.2f));
             var cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = Color.black;

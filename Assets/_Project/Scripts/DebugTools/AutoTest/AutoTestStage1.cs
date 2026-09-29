@@ -28,15 +28,19 @@ namespace NightOffice
 
             // 2) the field talks (synthetic voice): audible + ducking
             FieldInput(talk: true);
-            yield return new WaitForSeconds(2.0f);
-            float proxLevel = HostHearsPeak();
+            yield return new WaitForSeconds(0.5f);
+            yield return ListenHost(2.5f);
+            float proxLevel = m_Heard;
             Check("근접 음성이 실제로 재생됨(출력 레벨)", proxLevel > 0.002f, $"rms={proxLevel:0.0000} {field.remoteVoice?.TestSourceState}");
             Check("덕킹: 목소리 동안 환경음 감쇠", Ducker.I.GainDb < -3f, $"{Ducker.I.GainDb:0.0}dB");
 
-            // 3) field just outside the closed office door: muffled
+            // 3) field just outside the closed office door, control just inside it: muffled both ways
+            //    (the mumble only leaks while the speaker is within muffleRadius of the door)
             field.TeleportRpc(new Vector3(1.0f, 0f, 7.0f), 90f);
-            yield return new WaitForSeconds(1.5f);
-            float muffLevel = HostHearsPeak();
+            control.TeleportRpc(new Vector3(-1.5f, 0f, 6.3f), 90f);
+            yield return new WaitForSeconds(1.0f);
+            yield return ListenHost(2.5f);
+            float muffLevel = m_Heard;
             Check("문 닫힘 + 문 바로 밖: 웅얼거림(Muffled)", Route(null) == "Muffled", Route(null));
             Check("웅얼거림도 소리는 난다", muffLevel > 0.0005f, $"rms={muffLevel:0.0000} (근접 {proxLevel:0.0000})");
             yield return AskClient();
@@ -51,6 +55,8 @@ namespace NightOffice
             field.TeleportRpc(new Vector3(5.5f, 0f, 7.0f), 90f);
             yield return new WaitForSeconds(1.2f);
             Check("문 열림 + 로비 안쪽: 근접", Route(null) == "Proximity", Route(null));
+            yield return ListenHost(2.0f);
+            float lvlBeforeLatch = m_Heard;
             int latchFrame = -1;
             float latchTime = 0f;
             System.Action<Door, bool> onLatch = (d, open) =>
@@ -66,7 +72,6 @@ namespace NightOffice
             float t0 = Time.time;
             while (latchFrame < 0 && Time.time - t0 < 3f) yield return null;
             int cutFrame = -1;
-            float lvlBeforeLatch = HostHearsPeak();
             while (Time.time - latchTime < 0.5f)
             {
                 if (cutFrame < 0 && Route(null) == "Cut") cutFrame = Time.frameCount;
@@ -82,7 +87,7 @@ namespace NightOffice
                 yield return null;
             }
             Check("문이 닫히는 순간 컷(래치 후 1프레임 이내)", latchFrame > 0 && cutFrame >= 0 && cutFrame - latchFrame <= 1, $"latchFrame={latchFrame} cutFrame={cutFrame}");
-            Check("컷 이후 출력 무음", lvlBeforeLatch > 0.001f && lvlAfter < 0.0005f, $"before(peak)={lvlBeforeLatch:0.0000} after(max 0.6s)={lvlAfter:0.0000}");
+            Check("컷 이후 출력 무음", lvlBeforeLatch > 0.001f && lvlAfter < 0.0005f, $"before(max 2s)={lvlBeforeLatch:0.0000} after(max 0.6s)={lvlAfter:0.0000}");
 
             // 6) radio dead zone around the office
             field.TeleportRpc(new Vector3(6.5f, 0f, 4.0f), 0f); // 7.2 m from the office door: inside the dead radius, outside the mumble radius
@@ -105,8 +110,9 @@ namespace NightOffice
             yield return new WaitForSeconds(1.0f);
             Check("현장 무전 송신 점유", RadioNet.I.Transmitter.Value == field.OwnerClientId, RadioNet.I.Transmitter.Value.ToString());
             Check("상황실: 무전 경로로 들림", Route(null) == "Radio", Route(null));
-            Check("무전 음성 출력 레벨", HostHearsPeak() > 0.001f, $"peak={HostHearsPeak():0.0000} {field.remoteVoice?.TestSourceState}");
             Check("상황실 수신 표시", RadioClient.I.ReceivingNow, "");
+            yield return ListenHost(2.0f);
+            Check("무전 음성 출력 레벨", m_Heard > 0.001f, $"max={m_Heard:0.0000} {field.remoteVoice?.TestSourceState}");
             FieldInput(ptt: false, talk: true);
             yield return new WaitForSeconds(0.12f);
             string tailRoute = Route(null);
@@ -148,7 +154,8 @@ namespace NightOffice
             yield return new WaitForSeconds(1.2f);
             yield return AskClient();
             Check("현장: 상황실 무전이 무전 경로로", m_ClientObsOk && m_ClientObs.otherRoute == "Radio", m_ClientObs.otherRoute);
-            Check("현장 무전 출력 레벨", m_ClientObs.otherPeakLevel > 0.001f, $"peak={m_ClientObs.otherPeakLevel:0.0000}");
+            yield return ListenClient(3);
+            Check("현장 무전 출력 레벨", m_Heard > 0.001f, $"max={m_Heard:0.0000}");
             ControlInput(ptt: false, talk: false);
             yield return new WaitForSeconds(1.0f);
             yield return AskClient();
@@ -167,11 +174,12 @@ namespace NightOffice
             FieldInput();
             Check("송신 안 할 때는 전달 안 됨", RadioNet.RadioRelayCount == relay0, $"relayed {RadioNet.RadioRelayCount - relay0}");
 
-            // 12) fire door boundary (both outside the office, test only)
-            var fire3 = FindDoor(DoorKind.Fire, 3);
+            // 12) fire door boundary: east stairwell door on 3F (both outside the office, test only)
+            var fire3 = Door.ByKey("fireE3");
+            var east = BuildingLayout.EastStair;
             fire3.ServerClose();
-            control.TeleportRpc(new Vector3(10.6f, BuildingLayout.FloorY(3), 9.2f), 90f);
-            field.TeleportRpc(new Vector3(14.5f, BuildingLayout.FloorY(3), 9.4f), -90f);
+            control.TeleportRpc(east.Door(3) + east.OutDir * 1.6f, 180f);
+            field.TeleportRpc(east.LandingCenter(3) + Vector3.right * 0.8f, 0f);
             FieldInput(talk: true);
             yield return new WaitForSeconds(1.5f);
             Check("방화문 닫힘: 반대편 컷", Route(null) == "Cut", Route(null));
@@ -232,10 +240,10 @@ namespace NightOffice
             Check("상황실: 사무실 문을 보면 '문 열기' 안내", prompt == "문 열기", prompt ?? "(없음)");
             AutoTestNet.CaptureLocal("s1_control_door.png");
 
-            // field in the 3F corridor with the flashlight on
-            field.TeleportRpc(new Vector3(10.5f, BuildingLayout.FloorY(3), 9.2f), -90f);
+            // field in the 3F corridor (west end, looking down the corridor) with the flashlight on
+            field.TeleportRpc(new Vector3(BuildingLayout.WestStairDoorX + 2.5f, BuildingLayout.FloorY(3), 9.0f), 90f);
             yield return new WaitForSeconds(1.0f);
-            AutoTestNet.I.ClientLookRpc(-90f, 12f);
+            AutoTestNet.I.ClientLookRpc(90f, 8f);
             AutoTestNet.I.ClientSetFlagRpc(PlayerNet.Flags.FlashOn, true);
             yield return new WaitForSeconds(1.0f);
             Check("현장 손전등 켜짐이 상황실에도 동기화", field.Has(PlayerNet.Flags.FlashOn), $"flags={(PlayerNet.Flags)field.NetFlags.Value}");

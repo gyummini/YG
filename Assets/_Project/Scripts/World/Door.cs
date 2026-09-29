@@ -22,6 +22,8 @@ namespace NightOffice
     public class Door : NetworkBehaviour, IAcousticGate
     {
         public DoorKind kind;
+        [Tooltip("Stable key from BuildingLayout.DoorSpecs (e.g. fireMid3, fireW1, unit305).")]
+        public string key;
         public string label = "문";
         public int floor = 1;
         public int unitNumber;
@@ -32,6 +34,8 @@ namespace NightOffice
         public float openAngle = 100f;
         [Tooltip("Door plane normal points toward side A (outside).")]
         public Transform frame;
+        [Tooltip("복도 방화문: held open by a door holder, never auto-closes; either side can push it shut, the card opens it again.")]
+        public bool holdOpen;
 
         public readonly NetworkVariable<bool> IsOpen = new NetworkVariable<bool>(false);
         public readonly NetworkVariable<bool> Locked = new NetworkVariable<bool>(false);
@@ -52,6 +56,19 @@ namespace NightOffice
 
         void OnEnable() => All.Add(this);
         void OnDisable() => All.Remove(this);
+
+        public static Door ByKey(string key)
+        {
+            foreach (var d in All)
+                if (d != null && d.key == key)
+                    return d;
+            return null;
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            if (IsServer && holdOpen && GameSettings.I.doors.midFireDoorStartsOpen) ServerOpen(0f);
+        }
 
         /// <summary>True if the point is on side B (inside) of the door plane.</summary>
         public bool IsInsideSide(Vector3 p) => Vector3.Dot(p - Center, OutwardNormal) < 0f;
@@ -131,6 +148,7 @@ namespace NightOffice
         float AutoCloseFor()
         {
             var s = GameSettings.I.doors;
+            if (holdOpen) return 0f;
             switch (kind)
             {
                 case DoorKind.Office: return s.officeAutoCloseSec;
@@ -142,7 +160,7 @@ namespace NightOffice
 
         // ---------------------------------------------------------------- RPCs from clients
 
-        /// <summary>Inside handle (office, unit room): toggle.</summary>
+        /// <summary>Inside handle (office, unit room): toggle. Held-open fire door: push it shut from either side.</summary>
         [Rpc(SendTo.Server)]
         public void RequestToggleRpc(RpcParams rpcParams = default)
         {
@@ -157,6 +175,9 @@ namespace NightOffice
                     break;
                 case DoorKind.Unit:
                     if (!inside) return; // outside uses the card
+                    break;
+                case DoorKind.Fire:
+                    if (!holdOpen || !IsOpen.Value) return; // opening a fire door always takes the card
                     break;
                 default:
                     return;

@@ -60,6 +60,7 @@ namespace NightOffice
                     case "stage2": suite = Stage2(); break;
                     case "stage3": suite = Stage3(); break;
                     case "online": suite = Online(); break;
+                    case "map": suite = MapSuite(); break;
                 }
                 if (suite != null) yield return StartCoroutine(Guard(suite));
                 else Note("unknown suite " + m_Request.suite);
@@ -214,6 +215,35 @@ namespace NightOffice
             var local = PlayerNet.Local;
             var other = local != null ? local.Other : null;
             return other != null && other.remoteVoice != null ? other.remoteVoice.Level : 0f;
+        }
+
+        float m_Heard;
+
+        /// <summary>
+        /// Max output level of the other player's voice (host side) over a window. The synthetic voice starts at a
+        /// random point of a babble clip with pauses, so a single short peak window can land in silence.
+        /// </summary>
+        IEnumerator ListenHost(float seconds)
+        {
+            m_Heard = 0f;
+            float t0 = Time.time;
+            while (Time.time - t0 < seconds)
+            {
+                m_Heard = Mathf.Max(m_Heard, HostHearsLevel());
+                yield return null;
+            }
+        }
+
+        /// <summary>Client side of <see cref="ListenHost"/>: best of a few client reports (each holds a 1 s peak).</summary>
+        IEnumerator ListenClient(int reports)
+        {
+            m_Heard = 0f;
+            for (int i = 0; i < reports; i++)
+            {
+                yield return AskClient();
+                if (m_ClientObsOk) m_Heard = Mathf.Max(m_Heard, m_ClientObs.otherPeakLevel);
+                yield return new WaitForSeconds(0.8f);
+            }
         }
 
         /// <summary>Peak output level of the other player's voice over the last second (host side).</summary>

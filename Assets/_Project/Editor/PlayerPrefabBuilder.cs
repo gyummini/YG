@@ -12,6 +12,8 @@ namespace NightOffice.EditorTools
     {
         public const string PrefabPath = AssetFactory.Root + "/Prefabs/Player.prefab";
         public const string ListPath = AssetFactory.Root + "/Prefabs/NetworkPrefabs.asset";
+        /// <summary>Dark night sky behind the next building across (slightly lighter than the fog so silhouettes read).</summary>
+        public static readonly Color SkyColor = new Color(0.016f, 0.02f, 0.036f);
 
         [MenuItem("NightOffice/Setup/Build Player Prefab")]
         public static GameObject Build()
@@ -74,7 +76,7 @@ namespace NightOffice.EditorTools
             cam.farClipPlane = 80f;
             cam.fieldOfView = 70f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Color.black;
+            cam.backgroundColor = SkyColor; // seen only over the open corridor railing
             int localBody = LayerMask.NameToLayer("LocalBody");
             int mirrorOnly = LayerMask.NameToLayer("MirrorOnly");
             int mask = ~0;

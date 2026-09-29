@@ -409,6 +409,14 @@ MonoBehaviour:
     minDistance: 2
     maxDistance: 25
     category: 2
+  - id: 95
+    clips:
+    - {fileID: 8300000, guid: dc4d7cd11a94286468f409c9db5cf29b, type: 3}
+    volume: 0.55
+    pitchJitter: 0
+    minDistance: 3
+    maxDistance: 28
+    category: 2
   - id: 100
     clips:
     - {fileID: 8300000, guid: 76a975444fcc6144985d545d5b9925ec, type: 3}

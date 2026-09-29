@@ -106,6 +106,7 @@ namespace NightOffice
             [Tooltip("관리사무소 문 자동 닫힘(초)")] public float officeAutoCloseSec = 4f;
             [Tooltip("방화문 자동 닫힘(초)")] public float fireAutoCloseSec = 3f;
             [Tooltip("세대 문 자동 닫힘(초, 0이면 수동)")] public float unitAutoCloseSec = 0f;
+            [Tooltip("복도 중간 방화문은 도어 홀더로 열린 채 밤을 시작(자동으로 닫히지 않고, 닫으면 카드로만 다시 열림)")] public bool midFireDoorStartsOpen = true;
         }
 
         [Serializable]
@@ -119,7 +120,7 @@ namespace NightOffice
         [Serializable]
         public class LightSettings
         {
-            [Tooltip("밤 시작 시 층 복도 조명이 켜져 있을 확률")] public float initialCorridorOnChance = 0.6f;
+            [Tooltip("밤 시작 시 층 복도 구간(서/동, 복도 방화문 기준)마다 조명이 켜져 있을 확률")] public float initialCorridorOnChance = 0.6f;
             [Tooltip("등기구 1개 소비 전력(kW)")] public float fixtureKw = 0.12f;
             [Tooltip("층별 기본 부하(kW)")] public float floorBaseKw = 0.8f;
             [Tooltip("계기판 잡음(kW)")] public float powerNoiseKw = 0.015f;

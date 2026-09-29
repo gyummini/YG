@@ -13,6 +13,16 @@ namespace NightOffice
         IAcousticGate m_Gate;
         bool m_Resolved;
 
+        /// <summary>Code-assigned gate (tests, portals built at runtime); replaces the serialized one.</summary>
+        public IAcousticGate Gate
+        {
+            set
+            {
+                m_Gate = value;
+                m_Resolved = true;
+            }
+        }
+
         public bool IsOpen
         {
             get

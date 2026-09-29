@@ -26,8 +26,28 @@ namespace NightOffice.EditorTools
             SetPhysics();
             SetPlayer();
             SetAudio();
+            SetNavAgent();
             AssetDatabase.SaveAssets();
             Debug.Log("[NightOffice] project settings applied");
+        }
+
+        /// <summary>
+        /// Default navmesh agent (Humanoid, id 0) sized like the player capsule so 0.9 m unit doorways stay walkable.
+        /// Radius 0.3, height 1.8, step 0.35, max slope 40° (stair flights are ~22°).
+        /// </summary>
+        public static void SetNavAgent()
+        {
+            var assets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/NavMeshAreas.asset");
+            if (assets == null || assets.Length == 0) return;
+            var so = new SerializedObject(assets[0]);
+            var settings = so.FindProperty("m_Settings");
+            if (settings == null || settings.arraySize == 0) return;
+            var a = settings.GetArrayElementAtIndex(0);
+            a.FindPropertyRelative("agentRadius").floatValue = 0.3f;
+            a.FindPropertyRelative("agentHeight").floatValue = 1.8f;
+            a.FindPropertyRelative("agentClimb").floatValue = 0.35f;
+            a.FindPropertyRelative("agentSlope").floatValue = 40f;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static void SetLayers()

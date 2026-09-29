@@ -529,22 +529,53 @@ def ui_sounds():
     write("complaint_done", peak_norm(fade(tone), -10))
 
 
+# ------------------------------------------------------------------ added after stage 1 (own RNG each, so the
+# clips above keep their exact bytes no matter what is appended here)
+def amb_outdoor():
+    """Open-air corridor at night: distant city rumble, soft wind gusts, one far car, faint crickets."""
+    rng = np.random.default_rng(20260929)
+    sec = 24.0
+    n = int(sec * SR)
+    t = t_axis(sec)
+
+    def pink_l():
+        w = rng.standard_normal(n)
+        return signal.lfilter([0.049922035, -0.095993537, 0.050612699, -0.004408786], [1, -2.494956002, 2.017265875, -0.522189400], w)
+
+    def unit_rms(x):
+        return x / (np.sqrt(np.mean(x ** 2)) + 1e-12)
+
+    city = unit_rms(lp(pink_l(), 220, 4)) * (1 + 0.12 * np.sin(2 * np.pi * 0.031 * t + 0.4))
+    gust = 0.35 + 0.65 * np.clip(0.5 + 0.5 * np.sin(2 * np.pi * 0.045 * t) * np.sin(2 * np.pi * 0.11 * t + 1.3), 0, 1) ** 2
+    wind = unit_rms(bp(pink_l(), 300, 1600)) * gust * 0.55
+    car = unit_rms(lp(pink_l(), 700, 2)) * np.exp(-((t - 9.0) / 3.2) ** 2) * 0.9
+    crickets = np.zeros(n)
+    pos = 0.3
+    while pos < sec - 0.4:
+        f = 4400 + rng.uniform(-60, 60)
+        for k in range(3):
+            s0 = int((pos + k * 0.045) * SR)
+            ln = int(0.028 * SR)
+            tt = np.arange(ln) / SR
+            crickets[s0:s0 + ln] += np.sin(2 * np.pi * f * tt) * np.sin(np.pi * tt / 0.028) ** 2
+        pos += rng.uniform(0.75, 1.05)
+    crickets *= 0.5 + 0.5 * np.sin(2 * np.pi * 0.07 * t + 2.0) ** 2
+    x = city + wind + car + crickets * 0.3
+    write("amb_outdoor", rms_norm(loopify(x, 1.5), -34))
+
+
+GENERATORS = [
+    amb_fan, amb_fluorescent, amb_room, amb_substation, amb_stair, elevator_motor, radio_hiss, radio_dead,
+    footsteps, door_sounds, radio_sounds, elevator_sounds, office_sounds, light_sounds, entity_sounds, voices,
+    ui_sounds, amb_outdoor,
+]
+
 if __name__ == "__main__":
-    amb_fan()
-    amb_fluorescent()
-    amb_room()
-    amb_substation()
-    amb_stair()
-    elevator_motor()
-    radio_hiss()
-    radio_dead()
-    footsteps()
-    door_sounds()
-    radio_sounds()
-    elevator_sounds()
-    office_sounds()
-    light_sounds()
-    entity_sounds()
-    voices()
-    ui_sounds()
+    # python Tools/audio_synth.py            -> everything (the shared RNG runs in this order: output is reproducible)
+    # python Tools/audio_synth.py amb_outdoor -> only the named generators (safe for the own-RNG ones at the end)
+    import sys
+    only = set(sys.argv[1:])
+    for gen in GENERATORS:
+        if not only or gen.__name__ in only:
+            gen()
     print("done ->", OUT)

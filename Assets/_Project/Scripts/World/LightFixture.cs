@@ -7,8 +7,12 @@ namespace NightOffice
     public class LightFixture : MonoBehaviour
     {
         public int fixtureId;
-        [Tooltip("0 = office, 1..4 = floor circuit, -1 = always on")]
+        [Tooltip("0 = office, 1 = 1F, 2.. = (floor, section) circuits (BuildingLayout.Circuit), -1 = always on")]
         public int circuit;
+        [Tooltip("Floor for the power gauge (0 = office / elevator cab, not counted).")]
+        public int floor;
+        [Tooltip("Corridor section on 2F~4F: 0 = west, 1 = east.")]
+        public int section;
         public Light lamp;
         public Renderer tube;
         public Material onMaterial;

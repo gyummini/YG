@@ -20,11 +20,11 @@ namespace NightOffice
         int[] m_Parent;
         int m_CachedFrame = -1;
         readonly Dictionary<int, Zone> m_ById = new Dictionary<int, Zone>();
+        readonly Dictionary<string, Zone> m_ByKey = new Dictionary<string, Zone>();
 
         public Zone Office { get; private set; }
         public Zone Lobby { get; private set; }
-        public Zone Stair { get; private set; }
-        readonly Zone[] m_Corridors = new Zone[BuildingLayout.MaxFloor + 1];
+        readonly Zone[,] m_Corridors = new Zone[BuildingLayout.MaxFloor + 1, 2];
 
         protected override void Awake()
         {
@@ -35,30 +35,39 @@ namespace NightOffice
         public void Rebuild()
         {
             m_ById.Clear();
+            m_ByKey.Clear();
             int maxId = 0;
             foreach (var z in zones)
             {
                 if (z == null) continue;
                 m_ById[z.zoneId] = z;
+                if (!string.IsNullOrEmpty(z.key)) m_ByKey[z.key] = z;
                 maxId = Mathf.Max(maxId, z.zoneId);
                 switch (z.type)
                 {
                     case ZoneType.Office: Office = z; break;
                     case ZoneType.Lobby: Lobby = z; break;
-                    case ZoneType.Stair: Stair = z; break;
-                    case ZoneType.Corridor: m_Corridors[Mathf.Clamp(z.floor, 0, BuildingLayout.MaxFloor)] = z; break;
+                    case ZoneType.Corridor:
+                        if (z.floor >= 0 && z.floor <= BuildingLayout.MaxFloor && z.section >= 0 && z.section <= 1)
+                            m_Corridors[z.floor, z.section] = z;
+                        break;
                 }
             }
+            if (cabZone != null) maxId = Mathf.Max(maxId, cabZone.zoneId);
             m_Parent = new int[maxId + 1];
             m_CachedFrame = -1;
         }
 
         public Zone ById(int id) => m_ById.TryGetValue(id, out var z) ? z : null;
 
-        public Zone Corridor(int floor) => floor >= 0 && floor < m_Corridors.Length ? m_Corridors[floor] : null;
+        public Zone ByKey(string key) => key != null && m_ByKey.TryGetValue(key, out var z) ? z : null;
 
-        /// <summary>Hall zone for a floor: lobby on 1F, corridor above.</summary>
-        public Zone FloorHall(int floor) => floor <= 1 ? Lobby : Corridor(floor);
+        /// <summary>Corridor zone of one section (0 = west, 1 = east) on 2F~4F.</summary>
+        public Zone Corridor(int floor, int section) =>
+            floor >= 0 && floor <= BuildingLayout.MaxFloor && section >= 0 && section <= 1 ? m_Corridors[floor, section] : null;
+
+        /// <summary>Zone the elevator opens onto: the 1F corridor (lobby) or the elevator hall section above.</summary>
+        public Zone FloorHall(int floor) => floor <= 1 ? Lobby : Corridor(floor, BuildingLayout.ElevatorHallSection);
 
         public Zone GetZone(Vector3 p)
         {
@@ -93,7 +102,7 @@ namespace NightOffice
             return Find(a.zoneId) == Find(b.zoneId);
         }
 
-        /// <summary>Is the portal between these two specific zones currently closed? (false if none exists)</summary>
+        /// <summary>The portal between these two specific zones (null if none exists).</summary>
         public ZonePortal PortalBetween(Zone a, Zone b)
         {
             foreach (var p in portals)

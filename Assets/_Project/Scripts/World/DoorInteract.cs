@@ -22,7 +22,8 @@ namespace NightOffice
                     if (inside) return door.IsOpen.Value ? "문 닫기" : "문 열기";
                     return door.IsOpen.Value ? null : $"카드 찍기 ({door.label})";
                 case DoorKind.Fire:
-                    return door.IsOpen.Value ? null : $"카드 찍기 ({door.label})";
+                    if (door.IsOpen.Value) return door.holdOpen ? "문 닫기" : null;
+                    return $"카드 찍기 ({door.label})";
                 default:
                     return "잠겨 있다";
             }
@@ -43,7 +44,8 @@ namespace NightOffice
                     else door.RequestSwipeRpc();
                     break;
                 case DoorKind.Fire:
-                    door.RequestSwipeRpc();
+                    if (door.IsOpen.Value && door.holdOpen) door.RequestToggleRpc();
+                    else door.RequestSwipeRpc();
                     break;
                 default:
                     AudioService.I?.PlayAt(SfxId.DoorLocked, door.Center, 1f, SfxFlags.DoorBoth, door);

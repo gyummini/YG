@@ -9,8 +9,12 @@ namespace NightOffice
     public class Zone : MonoBehaviour
     {
         public int zoneId;
+        [Tooltip("Stable key from BuildingLayout.ZoneSpecs (e.g. corrW3, stairE, unit305).")]
+        public string key;
         public ZoneType type;
         public int floor = 1;
+        [Tooltip("Corridor section / stairwell side: 0 = west, 1 = east, -1 = none.")]
+        public int section = -1;
         public string label;
         [Tooltip("Boxes in world space, or in local space when isDynamic (elevator cab).")]
         public Bounds[] boxes = new Bounds[0];

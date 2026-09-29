@@ -46,10 +46,12 @@ namespace NightOffice
 
         public void ServerResetWorld(System.Random rng)
         {
+            bool midOpen = GameSettings.I.doors.midFireDoorStartsOpen;
             foreach (var d in Door.All)
             {
                 if (d == null) continue;
-                d.ServerClose();
+                if (d.holdOpen && midOpen) d.ServerOpen(0f);
+                else d.ServerClose();
                 d.ServerSetLocked(d.kind == DoorKind.Substation || d.kind == DoorKind.Entrance || d.kind == DoorKind.Roof);
             }
             UnitRegistry.I?.ServerRoll(rng.Next());
@@ -57,7 +59,7 @@ namespace NightOffice
             if (lights != null)
             {
                 lights.ServerReviveAll();
-                lights.ServerRandomizeFloors(GameSettings.I.lights.initialCorridorOnChance, rng);
+                lights.ServerRandomizeSections(GameSettings.I.lights.initialCorridorOnChance, rng);
             }
             Elevator.I?.ServerResetTo(1);
             CardLog.I?.ServerClear();
