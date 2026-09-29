@@ -31,6 +31,9 @@ namespace NightOffice
 
         public bool IsLitNow => m_Lit && Time.time >= m_StartupUntil;
 
+        /// <summary>Changes the lamp's lit intensity (Update re-applies it every frame).</summary>
+        public void SetBaseIntensity(float intensity) => m_BaseIntensity = intensity;
+
         void Awake()
         {
             if (lamp != null) m_BaseIntensity = lamp.intensity;

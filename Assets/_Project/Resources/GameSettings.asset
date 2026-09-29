@@ -23,6 +23,8 @@ MonoBehaviour:
     clearBundlesOnReturn: 1
     vacantPerFloor: 2
     storagePerFloor: 1
+    complaintCheckHoldSec: 1.2
+    complaintCheckDistance: 2.6
   player:
     walkSpeed: 2.3
     lookSensitivity: 0.11
@@ -66,6 +68,7 @@ MonoBehaviour:
     officeAutoCloseSec: 4
     fireAutoCloseSec: 3
     unitAutoCloseSec: 0
+    midFireDoorStartsOpen: 1
   elevator:
     floorTravelSec: 3
     doorAnimSec: 1
@@ -75,6 +78,64 @@ MonoBehaviour:
     fixtureKw: 0.12
     floorBaseKw: 0.8
     powerNoiseKw: 0.015
+  entities:
+    manifestDelaySec: {x: 4, y: 10}
+    footstepManifestDelaySec: {x: 1.5, y: 4}
+    tickSec: 0.1
+    spawnDistance: 22
+    tallOneSpeed: 0.55
+    escortSpeed: 0.95
+    warnedSpeedMultiplier: 2.6
+    ruleRange: 12
+    engageDistance: 2.2
+    gazeAngle: 15
+    gazeBreakTolerance: 1
+    ruleGrace: 2
+    gazeHoldToRetreat: 4
+    flashDropDistance: 2.5
+    moveTolerance: 0.5
+    lightsOnGrace: 2.5
+    darkPatience: 45
+    escortLockDistance: 6
+    escortPassRange: 4
+    escortHeadUpGrace: 1
+    escortContactDistance: 1.4
+    escortPassedDistance: 6
+    fingerVisibleDistance: 4
+    eatIntervalSec: 2.4
+    eaterLockDistance: 12
+    eaterStarveSec: 10
+    eaterContactDistance: 3
+    eaterNoiseRange: 30
+    eaterLureMeals: 4
+    panelHoldSec: 2.5
+    emptyFloorCloseSec: 9
+    emptyFloorDarkPatience: 60
+    lookBackAngle: 45
+    passengerRuleGrace: 1.5
+    lookBackTolerance: 0.3
+    mirrorGazeSec: 1
+    walkOutSec: 7
+    passengerHaltSec: 4
+    passengerUpChance: 0.5
+    followDistance: 2.2
+    followStartDistance: 8
+    followCloseInSpeed: 1.2
+    followWarnedDistance: 0.9
+    followerRuleGrace: 6
+    txReleaseGrace: 1.5
+    followerFadeSec: 8
+    followerStillTolerance: 3
+    followerPatience: 90
+    echoDelaySec: 0.16
+    echoTailSec: 0.45
+    mimicChance: 0.5
+    mimicDelaySec: {x: 4, y: 12}
+    mimicMinFieldDistance: 12
+    mimicRepeatSec: 8
+    mimicLingerSec: 20
+    mimicRetreatDistance: 6
+    mimicPowerOutSec: 60
   net:
     maxPlayers: 2
     lanPort: 7777
@@ -82,3 +143,15 @@ MonoBehaviour:
   debug:
     showOverlayOnStart: 0
     allowTestVoice: 1
+  lofi:
+    previewEnabled: 1
+    previewFloor: 3
+    screenHeight: 225
+    colorLevels: 15
+    dither: 1
+    textureDivisor: 16
+    signDivisor: 4
+    fogDensity: 0.085
+    lampIntensity: 2
+    shadowLamps: 3
+    shadowRefreshSec: 0.25

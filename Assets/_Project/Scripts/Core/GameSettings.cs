@@ -218,6 +218,23 @@ namespace NightOffice
             [Tooltip("가짜 목소리(합성 웅얼거림) 기능 허용")] public bool allowTestVoice = true;
         }
 
+        [Serializable]
+        public class LofiSettings
+        {
+            [Tooltip("로파이 미리보기: 플레이할 때만 한 층을 로파이 룩으로 꾸미고 화면에 로파이 효과를 건다 (씬 파일은 그대로, 자동 테스트 중엔 꺼짐)")]
+            public bool previewEnabled = true;
+            [Tooltip("미리보기로 꾸밀 층")] public int previewFloor = 3;
+            [Tooltip("화면 세로 해상도(픽셀). 가로는 화면 비율로 정해진다")] public int screenHeight = 225;
+            [Tooltip("채널당 색 단계")] public int colorLevels = 15;
+            [Tooltip("디더 세기 (0~1)")] [Range(0f, 1f)] public float dither = 1f;
+            [Tooltip("벽·바닥 텍스처 축소 비율 (1/n)")] public int textureDivisor = 16;
+            [Tooltip("표지·번호판 텍스처 축소 비율 (1/n)")] public int signDivisor = 4;
+            [Tooltip("안개 밀도 (지수)")] public float fogDensity = 0.085f;
+            [Tooltip("미리보기 층 복도 조명 세기")] public float lampIntensity = 2.0f;
+            [Tooltip("그림자를 드리우는 가까운 조명 수")] public int shadowLamps = 3;
+            [Tooltip("가까운 조명 그림자 갱신 간격(초)")] public float shadowRefreshSec = 0.25f;
+        }
+
         public NightSettings night = new NightSettings();
         public PlayerSettings player = new PlayerSettings();
         public VoiceSettings voice = new VoiceSettings();
@@ -228,5 +245,6 @@ namespace NightOffice
         public EntitySettings entities = new EntitySettings();
         public NetSettings net = new NetSettings();
         public DebugSettings debug = new DebugSettings();
+        public LofiSettings lofi = new LofiSettings();
     }
 }
