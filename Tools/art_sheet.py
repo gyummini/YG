@@ -20,6 +20,7 @@ LOOKS = {
     "C": "C 절제된 영화 톤",
     "D": "A + GPT 텍스처",
     "E": "C + GPT 텍스처",
+    "F": "B + GPT 텍스처",
     "GA": "A 목표 (GPT 콘셉트)",
     "GB": "B 목표 (GPT 콘셉트)",
     "GC": "C 목표 (GPT 콘셉트)",
@@ -49,7 +50,7 @@ def main():
             im = Image.open(p).convert("RGB")
             # cover-fit into the cell
             r = max(cw / im.width, ch / im.height)
-            im = im.resize((int(im.width * r + 0.5), int(im.height * r + 0.5)), Image.NEAREST if look == "B" else Image.LANCZOS)
+            im = im.resize((int(im.width * r + 0.5), int(im.height * r + 0.5)), Image.NEAREST if look in ("B", "F") else Image.LANCZOS)
             x0, y0 = (im.width - cw) // 2, (im.height - ch) // 2
             sheet.paste(im.crop((x0, y0, x0 + cw, y0 + ch)), (left + j * (cw + gap), y))
     out = os.path.join(ART, name + ".png")

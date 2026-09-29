@@ -14,13 +14,15 @@ namespace NightOffice.EditorTools
     /// the night backdrop, lighting with a trilight stand-in for bounce light, fog, post-processing) once per look,
     /// renders the same shots from fixed cameras (each with a reflection probe filled from its position), then reloads
     /// the scene from disk so nothing is saved. Output: TestResults/art/&lt;shot&gt;_&lt;look&gt;.png.
-    /// Looks: 0 현재(그레이박스) · A 사실적 · B 스타일화(로우파이) · C 절제된 영화 톤 · D = A, E = C with the
+    /// Looks: 0 현재(그레이박스) · A 사실적 · B 스타일화(로우파이) · C 절제된 영화 톤 · D = A, E = C, F = B with the
     /// GPT-generated material textures (Textures/ArtTest/gpt, made by Tools/gen_art_gpt.py) in place of the procedural ones.
     /// </summary>
     public static class ArtLookCapture
     {
         const string TexDir = AssetFactory.Root + "/Textures/ArtTest";
         const string PropDir = AssetFactory.Root + "/Models/Props";
+        const string EntityTexDir = AssetFactory.Root + "/Textures/Entities";
+        const string LofiFigurePath = AssetFactory.Root + "/Models/TallFigure_Lofi.fbx";
         static string OutDir => Path.Combine(Directory.GetParent(Application.dataPath).FullName, "TestResults", "art");
 
         public struct Shot
@@ -57,7 +59,7 @@ namespace NightOffice.EditorTools
         [MenuItem("NightOffice/Art/Capture Look Comparison")]
         public static void Run() => Capture("0ABC");
 
-        /// <summary>looks: any of '0' 'A' 'B' 'C' 'D' 'E'.</summary>
+        /// <summary>looks: any of '0' 'A' 'B' 'C' 'D' 'E' 'F'.</summary>
         public static string Capture(string looks)
         {
             if (EditorApplication.isPlaying) return "stop play mode first";
@@ -74,6 +76,65 @@ namespace NightOffice.EditorTools
             }
             EditorSceneManager.OpenScene(BuildingBuilder.ScenePath, OpenSceneMode.Single); // back to the saved scene
             return log.ToString();
+        }
+
+        /// <summary>The lo-fi 키다리 in the dressed corridor: far (10 m down the 3F corridor) and near (looking up at
+        /// its face from 3 m), plus the same near shot with the current greybox figure for comparison.
+        /// Output: TestResults/art/entity_{far,near,near_old}_&lt;look&gt;.png.</summary>
+        public static string CaptureEntity(string looks)
+        {
+            if (EditorApplication.isPlaying) return "stop play mode first";
+            Directory.CreateDirectory(OutDir);
+            ConfigureImports();
+            var log = new System.Text.StringBuilder();
+            var cam3 = L.PathPoint(6f, 3) + new Vector3(0f, 1.62f, 0f);
+            var shots = new[]
+            {
+                (new Shot { Name = "entity_far", Pos = cam3, LookAt = L.PathPoint(30f, 3) + new Vector3(0f, 1.4f, 0f), Fov = 60f }, L.PathPoint(16f, 3), false),
+                (new Shot { Name = "entity_near", Pos = L.PathPoint(12.5f, 3) + new Vector3(0f, 1.62f, 0f), LookAt = L.PathPoint(15.5f, 3) + new Vector3(0f, 1.75f, 0f), Fov = 62f }, L.PathPoint(15.5f, 3), false),
+                (new Shot { Name = "entity_near_old", Pos = L.PathPoint(12.5f, 3) + new Vector3(0f, 1.62f, 0f), LookAt = L.PathPoint(15.5f, 3) + new Vector3(0f, 1.75f, 0f), Fov = 62f }, L.PathPoint(15.5f, 3), true),
+            };
+            foreach (char look in looks)
+            {
+                EditorSceneManager.OpenScene(BuildingBuilder.ScenePath, OpenSceneMode.Single);
+                if (look != '0') Dress(look);
+                foreach (var (shot, at, old) in shots)
+                {
+                    var fig = old ? GreyFigure() : LofiFigure();
+                    if (fig == null) return "missing figure model or texture";
+                    fig.transform.position = at;
+                    var toCam = shot.Pos - at;
+                    toCam.y = 0f;
+                    fig.transform.rotation = Quaternion.LookRotation(toCam.normalized); // the model's front is +Z
+                    log.AppendLine(Render(shot, look));
+                    Object.DestroyImmediate(fig);
+                }
+            }
+            EditorSceneManager.OpenScene(BuildingBuilder.ScenePath, OpenSceneMode.Single);
+            return log.ToString();
+        }
+
+        static GameObject LofiFigure()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(LofiFigurePath);
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(EntityTexDir + "/tallfigure_lofi.png");
+            if (asset == null || tex == null) return null;
+            var go = (GameObject)Object.Instantiate(asset);
+            var m = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = "FigureLofi" };
+            m.SetTexture("_BaseMap", tex);
+            m.SetFloat("_Smoothness", 0.05f);
+            foreach (var r in go.GetComponentsInChildren<Renderer>(true)) r.sharedMaterial = m;
+            return go;
+        }
+
+        static GameObject GreyFigure()
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(BuildingBuilder.FigureModelPath);
+            if (asset == null) return null;
+            var go = (GameObject)Object.Instantiate(asset);
+            var m = AssetFactory.Mat("Figure");
+            foreach (var r in go.GetComponentsInChildren<Renderer>(true)) r.sharedMaterial = m;
+            return go;
         }
 
         // ================================================================== imports
@@ -93,6 +154,18 @@ namespace NightOffice.EditorTools
                 ti.anisoLevel = 8;
                 ti.SaveAndReimport();
             }
+            if (AssetDatabase.IsValidFolder(EntityTexDir))
+                foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { EntityTexDir }))
+                {
+                    // authored at their lo-fi size (256 px, indexed colours): keep every texel as it is
+                    if (!(AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) is TextureImporter ti)) continue;
+                    if (ti.filterMode == FilterMode.Point && !ti.mipmapEnabled && ti.textureCompression == TextureImporterCompression.Uncompressed) continue;
+                    ti.filterMode = FilterMode.Point;
+                    ti.mipmapEnabled = false;
+                    ti.textureCompression = TextureImporterCompression.Uncompressed;
+                    ti.wrapMode = TextureWrapMode.Clamp;
+                    ti.SaveAndReimport();
+                }
             foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { PropDir }))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -108,8 +181,8 @@ namespace NightOffice.EditorTools
 
         static bool s_Gpt;
 
-        /// <summary>The GPT-textured variant of a look (D → A, E → C); the others map to themselves.</summary>
-        static char BaseLook(char look) => look == 'D' ? 'A' : look == 'E' ? 'C' : look;
+        /// <summary>The GPT-textured variant of a look (D → A, E → C, F → B); the others map to themselves.</summary>
+        static char BaseLook(char look) => look == 'D' ? 'A' : look == 'E' ? 'C' : look == 'F' ? 'B' : look;
 
         static Texture2D Tex(string name)
         {
@@ -138,7 +211,7 @@ namespace NightOffice.EditorTools
             if (!s_SignMats.TryGetValue(tex, out var m) || m == null)
             {
                 m = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = "Sign_" + tex };
-                m.SetTexture("_BaseMap", s_Retro.Count > 0 && s_RetroLook ? Retro(t) : t);
+                m.SetTexture("_BaseMap", s_RetroLook ? Retro(t, 4) : t); // signs keep enough texels to stay legible
                 m.SetFloat("_Smoothness", 0.25f);
                 if (t.format == TextureFormat.RGBA32 || t.alphaIsTransparency || tex.StartsWith("floor"))
                 {
@@ -312,13 +385,14 @@ namespace NightOffice.EditorTools
             return m;
         }
 
-        static readonly Dictionary<Texture2D, Texture2D> s_Retro = new Dictionary<Texture2D, Texture2D>();
+        static readonly Dictionary<(Texture2D, int), Texture2D> s_Retro = new Dictionary<(Texture2D, int), Texture2D>();
 
-        /// <summary>A crunchy low-res, point-filtered copy (PS1-ish texel density).</summary>
-        static Texture2D Retro(Texture2D src)
+        /// <summary>A crunchy low-res, point-filtered copy (PS1-ish texel density: 1/16 of a 2048 tile over 3.2 m is
+        /// 40 texels per meter).</summary>
+        static Texture2D Retro(Texture2D src, int divisor = 16)
         {
-            if (s_Retro.TryGetValue(src, out var t) && t != null) return t;
-            int w = Mathf.Max(16, src.width / 32), h = Mathf.Max(16, src.height / 32);
+            if (s_Retro.TryGetValue((src, divisor), out var t) && t != null) return t;
+            int w = Mathf.Max(16, src.width / divisor), h = Mathf.Max(16, src.height / divisor);
             var rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             Graphics.Blit(src, rt);
             var prev = RenderTexture.active;
@@ -328,7 +402,7 @@ namespace NightOffice.EditorTools
             t.Apply();
             RenderTexture.active = prev;
             RenderTexture.ReleaseTemporary(rt);
-            s_Retro[src] = t;
+            s_Retro[(src, divisor)] = t;
             return t;
         }
 
@@ -374,6 +448,9 @@ namespace NightOffice.EditorTools
                 { "Soil", Lit("Soil", new Color(0.12f, 0.08f, 0.05f), 0.05f) },
                 { "BoardFrame", Lit("BoardFrame", new Color(0.55f, 0.56f, 0.57f), 0.55f, null, null, null, 1f, false, 0.8f) },
                 { "NoticeBoard", Lit("NoticeBoard", Color.white, 0.1f, SignTex("notices"), null, null, 1f, r) },
+                // units' corridor windows: dark glass that reflects the corridor instead of a flat black hole
+                { "WindowDark", Lit("WindowGlass", new Color(0.13f, 0.15f, 0.16f), 0.88f) },
+                { "Railing", Lit("Railing", new Color(0.24f, 0.25f, 0.26f), 0.45f, null, null, null, 1f, r, 0.6f) },
                 // lobby mailboxes (Tools/blender_art_lobby.py)
                 { "MailboxSteel", Lit("MailboxSteel", new Color(0.42f, 0.46f, 0.5f), 0.45f, null, null, null, 1f, r, 0.3f) },
                 { "MailboxDoor", Lit("MailboxDoor", new Color(0.5f, 0.54f, 0.57f), 0.5f, null, null, null, 1f, r, 0.3f) },
@@ -734,7 +811,7 @@ namespace NightOffice.EditorTools
             cam.backgroundColor = new Color(0.016f, 0.02f, 0.036f);
             go.transform.position = shot.Pos;
             go.transform.rotation = Quaternion.LookRotation(shot.LookAt - shot.Pos);
-            int w = spec.Retro ? 320 : 1600, h = spec.Retro ? 180 : 900;
+            int w = spec.Retro ? 400 : 1600, h = spec.Retro ? 225 : 900;
             var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { antiAliasing = 1 };
             cam.targetTexture = rt;
             cam.Render();
@@ -744,7 +821,7 @@ namespace NightOffice.EditorTools
             tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
             tex.Apply();
             RenderTexture.active = prev;
-            if (spec.Retro) tex = RetroPost(tex, 5);
+            if (spec.Retro) tex = RetroPost(tex, 4);
             string file = Path.Combine(OutDir, $"{shot.Name}_{look}.png");
             File.WriteAllBytes(file, tex.EncodeToPNG());
             Object.DestroyImmediate(tex);

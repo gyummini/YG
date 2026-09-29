@@ -9,7 +9,7 @@ GPT (Codex image generation) side of the art-direction test.
 
 Concepts attach the in-engine capture of the same shot and look (TestResults/art/<shot>_<look>.png, from
 NightOffice/Art/Capture Look Comparison) so the paint-over keeps our camera and layout; the gap between the two is the
-to-do list for that direction. Tiles become looks D (= A) and E (= C) in the capture tool.
+to-do list for that direction. Tiles become looks D (= A), E (= C) and F (= B) in the capture tool.
 Needs the Codex CLI (CODEX env var, default %TEMP%/nocx/codex.exe with codex-code-mode-host.exe beside it).
 """
 import os
@@ -72,7 +72,7 @@ CONCEPT_RULES = ("The attached image is an in-engine screenshot of this shot fro
 
 
 def concept_keys():
-    return [f"{shot}_G{look}" for look in "ACB" for shot in SHOTS]
+    return [f"{shot}_G{look}" for look in "BAC" for shot in SHOTS]  # B first: the direction the user leans toward
 
 
 def concept_prompt(key):
