@@ -17,12 +17,13 @@ import sys
 import time
 
 import numpy as np
+
+from codex_cli import exec_args
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "entity")
 OUT = os.path.join(ROOT, "Assets", "_Project", "Textures", "Entities", "tallfigure_lofi.png")
-CODEX = os.environ.get("CODEX", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "codex.exe"))
 VIEWS = ("front", "side", "back")
 ATLAS, COLORS = 256, 48
 
@@ -58,7 +59,7 @@ def gen():
     if os.path.exists(out):
         os.replace(out, os.path.join(WORK, f"paint_{int(time.time())}.png"))  # keep earlier takes
     t0 = time.time()
-    p = subprocess.run([CODEX, "exec", "--skip-git-repo-check", "--ephemeral", "-i", ref, "-s", "workspace-write", "-C", WORK, "-"],
+    p = subprocess.run(exec_args("medium") + ["-i", ref, "-s", "workspace-write", "-C", WORK, "-"],
                        input=PROMPT.encode("utf-8"), capture_output=True, timeout=900)
     ok = os.path.exists(out)
     print("paint", "ok" if ok else "FAILED " + " | ".join(p.stdout.decode("utf-8", "replace").strip().splitlines()[-2:]),

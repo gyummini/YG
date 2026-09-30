@@ -4,7 +4,7 @@ Generates the terminal manual's pictograms with Codex image generation, then con
     python Tools/gen_pictograms.py gen  [name ...]   -> raw PNGs into %TEMP%/nocx/pictos (skips existing)
     python Tools/gen_pictograms.py convert           -> 256px white-on-transparent PNGs into Assets/_Project/UI/Pictograms
 
-Needs a Codex CLI whose image tool can run (CODEX env var = path to codex.exe with codex-code-mode-host.exe beside it).
+Needs the Codex CLI (see Tools/codex_cli.py; runs at light effort, CODEX_EFFORT overrides).
 """
 import os
 import subprocess
@@ -14,10 +14,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageOps
 
+from codex_cli import exec_args
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "pictos")
 OUT = os.path.join(ROOT, "Assets", "_Project", "UI", "Pictograms")
-CODEX = os.environ.get("CODEX", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "codex.exe"))
 
 STYLE = ("Style: flat safety-sign pictogram like ISO 7010 / Korean public signage. Pure black shapes with thick uniform "
          "strokes on a pure white background. No text, no letters, no numbers, no border or frame, no shading, no "
@@ -70,7 +71,7 @@ def gen_one(name):
               f"current working directory (overwrite if it exists). Do not draw it with code; generate it as an image.\n"
               f"{STYLE}\nSubject: {SUBJECTS[name]}\nReply with just the saved file path.")
     t0 = time.time()
-    p = subprocess.run([CODEX, "exec", "--skip-git-repo-check", "--ephemeral", "-s", "workspace-write", "-C", WORK, "-"],
+    p = subprocess.run(exec_args("light") + ["-s", "workspace-write", "-C", WORK, "-"],
                        input=prompt.encode("utf-8"), capture_output=True, timeout=600)
     ok = os.path.exists(path)
     tail = p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] if not ok else []

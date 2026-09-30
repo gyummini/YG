@@ -18,7 +18,7 @@ NightOffice/Art/Capture Look Comparison) so the paint-over keeps our camera and 
 to-do list for that direction. Tiles become looks D (= A), E (= C) and F (= B) in the capture tool.
 The built maps (Textures/ArtTest/gpt, gpt_lofi) are not committed; the GPT originals are archived as 1024 px JPEGs in
 Docs/art/gpt_source, and build / lofi-build read them from there when %TEMP%/nocx/art has no copy.
-Needs the Codex CLI (CODEX env var, default %TEMP%/nocx/codex.exe with codex-code-mode-host.exe beside it).
+Needs the Codex CLI (see Tools/codex_cli.py; concepts run at medium effort, tiles at light; CODEX_EFFORT overrides).
 """
 import os
 import shutil
@@ -32,12 +32,12 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_art_textures as proc  # noqa: E402  (shared layouts and map writers)
+from codex_cli import exec_args  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "TestResults", "art")
 WORK = os.environ.get("ART_GPT_WORK", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "art"))
 GPT_OUT = os.environ.get("ART_GPT_OUT", os.path.join(proc.OUT, "gpt"))
-CODEX = os.environ.get("CODEX", os.path.join(os.environ.get("TEMP", "/tmp"), "nocx", "codex.exe"))
 SOURCE = os.path.join(ROOT, "Docs", "art", "gpt_source")
 
 
@@ -148,8 +148,8 @@ def lofi_tile_prompt(name):
 
 
 # ------------------------------------------------------------------ codex
-def run_codex(prompt, out_file, attach=None):
-    cmd = [CODEX, "exec", "--skip-git-repo-check", "--ephemeral"]
+def run_codex(prompt, out_file, attach=None, effort="medium"):
+    cmd = exec_args(effort)
     if attach:
         cmd += ["-i", attach]
     cmd += ["-s", "workspace-write", "-C", WORK, "-"]
@@ -194,7 +194,7 @@ def gen_tile(name):
     out = os.path.join(WORK, f"tile_{name}.png")
     if os.path.exists(out):
         return name, "exists", 0.0
-    ok, tail, sec = run_codex(tile_prompt(name), out)
+    ok, tail, sec = run_codex(tile_prompt(name), out, effort="light")
     return name, "ok" if ok else "FAILED " + tail, sec
 
 
@@ -202,7 +202,7 @@ def gen_lofi_tile(name):
     out = os.path.join(WORK, f"tile_lofi_{name}.png")
     if os.path.exists(out):
         return name, "exists", 0.0
-    ok, tail, sec = run_codex(lofi_tile_prompt(name), out)
+    ok, tail, sec = run_codex(lofi_tile_prompt(name), out, effort="light")
     return name, "ok" if ok else "FAILED " + tail, sec
 
 
