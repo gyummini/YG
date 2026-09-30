@@ -143,6 +143,7 @@ namespace NightOffice.EditorTools
             foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { TexDir }))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.Contains("/signs_pixel/")) continue; // authored on the texel grid (LofiLegibilityCapture imports them)
                 if (!(AssetImporter.GetAtPath(path) is TextureImporter ti)) continue;
                 bool normal = path.EndsWith("_normal.png"), mask = path.EndsWith("_mask.png"), sky = path.Contains("/sky_");
                 var type = normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
