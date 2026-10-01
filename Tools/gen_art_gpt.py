@@ -18,7 +18,7 @@ NightOffice/Art/Capture Look Comparison) so the paint-over keeps our camera and 
 to-do list for that direction. Tiles become looks D (= A), E (= C) and F (= B) in the capture tool.
 The built maps (Textures/ArtTest/gpt, gpt_lofi) are not committed; the GPT originals are archived as 1024 px JPEGs in
 Docs/art/gpt_source, and build / lofi-build read them from there when %TEMP%/nocx/art has no copy.
-Needs the Codex CLI (see Tools/codex_cli.py; concepts run at medium effort, tiles at light; CODEX_EFFORT overrides).
+Needs the Codex CLI (see Tools/codex_cli.py; concepts run at medium effort, tiles at low; CODEX_EFFORT overrides).
 """
 import os
 import shutil
@@ -194,7 +194,7 @@ def gen_tile(name):
     out = os.path.join(WORK, f"tile_{name}.png")
     if os.path.exists(out):
         return name, "exists", 0.0
-    ok, tail, sec = run_codex(tile_prompt(name), out, effort="light")
+    ok, tail, sec = run_codex(tile_prompt(name), out, effort="low")
     return name, "ok" if ok else "FAILED " + tail, sec
 
 
@@ -202,7 +202,7 @@ def gen_lofi_tile(name):
     out = os.path.join(WORK, f"tile_lofi_{name}.png")
     if os.path.exists(out):
         return name, "exists", 0.0
-    ok, tail, sec = run_codex(lofi_tile_prompt(name), out, effort="light")
+    ok, tail, sec = run_codex(lofi_tile_prompt(name), out, effort="low")
     return name, "ok" if ok else "FAILED " + tail, sec
 
 

@@ -4,7 +4,7 @@ Generates the terminal manual's pictograms with Codex image generation, then con
     python Tools/gen_pictograms.py gen  [name ...]   -> raw PNGs into %TEMP%/nocx/pictos (skips existing)
     python Tools/gen_pictograms.py convert           -> 256px white-on-transparent PNGs into Assets/_Project/UI/Pictograms
 
-Needs the Codex CLI (see Tools/codex_cli.py; runs at light effort, CODEX_EFFORT overrides).
+Needs the Codex CLI (see Tools/codex_cli.py; runs at low effort, CODEX_EFFORT overrides).
 """
 import os
 import subprocess
@@ -71,7 +71,7 @@ def gen_one(name):
               f"current working directory (overwrite if it exists). Do not draw it with code; generate it as an image.\n"
               f"{STYLE}\nSubject: {SUBJECTS[name]}\nReply with just the saved file path.")
     t0 = time.time()
-    p = subprocess.run(exec_args("light") + ["-s", "workspace-write", "-C", WORK, "-"],
+    p = subprocess.run(exec_args("low") + ["-s", "workspace-write", "-C", WORK, "-"],
                        input=prompt.encode("utf-8"), capture_output=True, timeout=600)
     ok = os.path.exists(path)
     tail = p.stdout.decode("utf-8", "replace").strip().splitlines()[-1:] if not ok else []

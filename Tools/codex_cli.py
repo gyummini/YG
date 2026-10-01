@@ -3,7 +3,8 @@ Shared Codex CLI settings for the image-generation scripts (gen_art_gpt, gen_ent
 
 - Binary: CODEX env var, else the newest Codex app CLI (%LOCALAPPDATA%/OpenAI/Codex/bin/*/codex.exe), else the old copy
   in %TEMP%/nocx. The app CLI follows the model set in ~/.codex/config.toml; older copies may not know it.
-- Reasoning effort: CODEX_EFFORT env var, else the caller's default. Levels: light, medium, high, xhigh, ultra.
+- Reasoning effort: CODEX_EFFORT env var, else the caller's default. Valid values (~/.codex/models_cache.json): low,
+  medium, high, xhigh, max, ultra. The app's labels differ (its "Light" is presumably low); "light" is not a valid value.
   Draft-quality images need no more than medium; xhigh and above are almost never worth the usage.
 """
 import glob
